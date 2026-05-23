@@ -1,0 +1,22 @@
+# ASCII
+# ---------------------------------------------
+w16-standart: "
+  MMM             MMM  MM   MMMM\n\
+   MMM    oMo    MMM   MM  MM\n\
+    MMM  MM MM  MMM    MM  MMMMa\n\
+     MMM M   M MMM     MM  MM  MM\n\
+      MMMP   PMMM      MM   MMMM"
+
+
+w16-small: "
+  MM     MM M  MM\n\
+   MM M MM  M M__\n\
+    MM MM   M M__]"
+
+w16-other_style: "
+  __              __  __    ___\n\
+  \ \     __     / / |  |  / __\\\n\
+   \ \   /  \   / /  |  | | |___\n\
+    \ \_/ /\ \_/ /   |  | | \_| |\n\
+     \___/  \___/    |__|  \___/"
+# ---------------------------------------------

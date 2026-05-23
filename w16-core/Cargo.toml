@@ -1,0 +1,21 @@
+[package]
+name = "w16-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cranelift = "0.131.1"
+cranelift-jit = "0.131.1"
+cranelift-module = "0.131.1"
+cranelift-native = "0.131.1"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "fast_vm"
+harness = false
+
+[[bench]]
+name = "fast_jit"
+harness = false

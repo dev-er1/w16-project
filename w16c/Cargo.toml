@@ -1,0 +1,15 @@
+[package]
+name = "w16c"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+w16-core = { path = "../w16-core" }
+
+cranelift-codegen = "0.131.1"
+cranelift-frontend = "0.131.1"
+cranelift-module = "0.131.1"
+cranelift-object = "0.131.1"
+target-lexicon = "0.13.5"
+cranelift = "0.131.1"
+cc = "1.2.62"

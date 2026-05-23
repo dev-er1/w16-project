@@ -1,0 +1,15 @@
+module benchmark {
+    fn @main() -> u64 {
+      let $i: u64 = 0;
+      let $sum: u64 = 0;
+      
+      while ($i < 1000000) {
+        $i = $i + 1;
+        $sum = $sum + $i;
+      }
+
+      print($sum);
+
+      return $sum;
+    }
+}

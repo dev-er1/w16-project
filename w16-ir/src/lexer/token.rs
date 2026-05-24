@@ -124,6 +124,11 @@ pub enum TokenKind {
     Shl,
     Shr,
 
+    /// `break`.
+    Break,
+    /// `continue`.
+    Continue,
+
     /// Конец файла.
     Eof,
 }

@@ -208,6 +208,17 @@ impl Parser {
             return Ok(Stmt::Return(vec![value]));
         }
 
+        if self.at(&TokenKind::Break) {
+            self.bump();
+            self.eat_optional_semicolon();
+            return Ok(Stmt::Break);
+        }
+        if self.at(&TokenKind::Continue) {
+            self.bump();
+            self.eat_optional_semicolon();
+            return Ok(Stmt::Continue);
+        }
+
         if self.at(&TokenKind::Halt) {
             self.bump();
             self.eat_optional_semicolon();

@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use crate::hir::*;
 use crate::semantic::SemanticError;
 
-/// Проверить полный HIR-модуль.
+/// # Проверить полный HIR-модуль.
 ///
 /// Возвращает список ошибок, чтобы CLI мог показать пользователю сразу
 /// несколько проблем, а не останавливаться на первой.
@@ -32,6 +32,7 @@ pub fn verify_hir_module(module: &Module) -> Result<(), Vec<SemanticError>> {
 struct FunctionSig {
     /// Типы параметров в порядке объявления.
     params: Vec<Type>,
+
     /// Тип результата функции.
     return_ty: ReturnType,
 }
@@ -40,12 +41,18 @@ struct FunctionSig {
 struct HirVerifier<'a> {
     /// Проверяемый модуль.
     module: &'a Module,
+
     /// Глобальные константы: имя -> тип.
     constants: HashMap<&'a str, Type>,
+
     /// Функции: имя -> сигнатура.
     functions: HashMap<&'a str, FunctionSig>,
+
     /// Накопленные ошибки.
     errors: Vec<SemanticError>,
+
+    /// Глубина циклов.
+    loop_depth: usize,
 }
 
 impl<'a> HirVerifier<'a> {
@@ -55,6 +62,7 @@ impl<'a> HirVerifier<'a> {
             constants: HashMap::new(),
             functions: HashMap::new(),
             errors: Vec::new(),
+            loop_depth: 0
         }
     }
 
@@ -160,14 +168,27 @@ impl<'a> HirVerifier<'a> {
                 self.verify_stmts(else_body, return_ty, scopes);
                 scopes.pop();
             }
+
             Stmt::While { cond, body } => {
                 self.expect_expr_type(cond, Type::Bool, scopes, "`while` condition");
-                // Тело while тоже отдельный scope. Значения, живущие между
-                // итерациями, позже будут выражены через MIR block params.
                 scopes.push();
+                self.loop_depth += 1;
                 self.verify_stmts(body, return_ty, scopes);
+                self.loop_depth -= 1;
                 scopes.pop();
             }
+            
+            Stmt::Break => {
+                if self.loop_depth == 0 {
+                    self.error("`break` outside of loop");
+                }
+            }
+            Stmt::Continue => {
+                if self.loop_depth == 0 {
+                    self.error("`continue` outside of loop");
+                }
+            }
+
             Stmt::Return(values) => {
                 let actual: Vec<Type> = values
                     .iter()
@@ -176,9 +197,7 @@ impl<'a> HirVerifier<'a> {
                 let expected = return_types(return_ty);
                 if actual != expected {
                     self.error(format!(
-                        "return type mismatch: expected {:?}, got {:?}",
-                        expected, actual
-                    ));
+                        "return type mismatch: expected {expected:?}, got {actual:?}"));
                 }
             }
             Stmt::Halt => {}
@@ -263,7 +282,7 @@ impl<'a> HirVerifier<'a> {
                     {
                         Some(lhs_ty)
                     }
-                    BinaryOp::BitAnd | BinaryOp::BitOr | BinaryOp::BitXor
+                    BinaryOp::BitAnd | BinaryOp::Shl | BinaryOp::Shr | BinaryOp::BitOr | BinaryOp::BitXor
                         if is_integer(lhs_ty) || lhs_ty == Type::Bool =>
                     {
                         Some(lhs_ty)

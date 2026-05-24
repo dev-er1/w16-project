@@ -41,10 +41,18 @@ struct Ctx<'f> {
     value_types: Vec<Type>,
     values: Vec<ValueData>,
     locals: HashMap<String, ValueId>,
+
     /// true если блок[i] уже получил финальный terminator (не заглушку)
     terminated: Vec<bool>,
+
     /// Карта имён функций -> FunctionId; нужна для резолва `Expr::Call`
     func_name_to_id: &'f HashMap<String, mir::FunctionId>,
+
+    /// Стек блоков-выходов из циклов (куда прыгает `break`).
+    loop_exit_stack: Vec<mir::BlockId>,
+
+    /// Стек заголовков циклов (куда прыгает `continue`).
+    loop_header_stack: Vec<mir::BlockId>,
 }
 
 impl<'f> Ctx<'f> {
@@ -59,6 +67,8 @@ impl<'f> Ctx<'f> {
             locals: HashMap::new(),
             terminated: Vec::new(),
             func_name_to_id,
+            loop_exit_stack: Vec::new(),
+            loop_header_stack: Vec::new()
         }
     }
 
@@ -535,6 +545,9 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
             let body_blk = ctx.new_block("loop_body");
             let exit_blk = ctx.new_block("loop_exit");
 
+            ctx.loop_exit_stack.push(exit_blk);
+            ctx.loop_header_stack.push(header_blk);
+
             // Снимок locals до цикла -- в этом порядке создаём параметры header
             let loop_vars: Vec<(String, ValueId)> = ctx
                 .locals
@@ -603,6 +616,20 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
             for (name, &param_id) in &phi_locals {
                 ctx.locals.insert(name.clone(), param_id);
             }
+
+            ctx.loop_exit_stack.pop();
+            ctx.loop_header_stack.pop();
+        }
+
+        Stmt::Break => {
+            let exit = *ctx.loop_exit_stack.last()
+                .expect("break should be in loop");
+            ctx.set_term(MIRTerminator::Jmp { target: exit, args: vec![] });
+        }
+        Stmt::Continue => {
+            let header = *ctx.loop_header_stack.last()
+                .expect("continue shouldn't be there");
+            ctx.set_term(MIRTerminator::Jmp { target: header, args: vec![] });
         }
 
         // -----------------------------------------------------------------
@@ -766,8 +793,8 @@ fn lower_expr(ctx: &mut Ctx, expr: &Expr, constants: &mut Vec<MIRConstant>) -> V
 
                 BinaryOp::Shl => ctx.emit(MIRInst::Shl(l, r)),
                 BinaryOp::Shr => match lty {
-                    Type::I64 => ctx.emit(MIRInst::Sar(l, r)), // арифметический сдвиг для знаковых
-                    _ => ctx.emit(MIRInst::Shr(l, r)),           // логический для беззнаковых
+                    Type::I64 => ctx.emit(MIRInst::Sar(l, r)), // Арифметический сдвиг для знаковых
+                    _ => ctx.emit(MIRInst::Shr(l, r)),           // Логический для беззнаковых
                 },
                 // Сравнения: F64 -> FCmp; I64 -> signed ICmp; иначе unsigned ICmp
                 BinaryOp::Eq => cmp(ctx, l, r, lty, ICmpOp::Eq, ICmpOp::Eq, FCmpOp::Eq),

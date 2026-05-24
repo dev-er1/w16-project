@@ -2,11 +2,12 @@ pub mod lexer;
 pub mod string_pool;
 pub mod error;
 pub mod parser;
+pub mod semantic;
 
 pub use lexer::Lexer;
 pub use parser::Parser;
 
-use crate::frontend::{lexer::{token::Token}, parser::{node::TranslationUnit}, string_pool::StringTable};
+use crate::frontend::{error::Error, lexer::token::Token, parser::node::TranslationUnit, semantic::{checker::Checker, resolver::Resolver}, string_pool::StringTable};
 
 // ---------------------------------------------------------
 // Frontend Context
@@ -26,7 +27,7 @@ impl<'a> W16CFrontend<'a> {
     }
 
     /// Получить токены
-    pub fn get_tokens(&mut self) -> Result<Vec<Token>, Vec<error::Error>> {
+    pub fn get_tokens(&mut self) -> Result<Vec<Token>, Vec<Error>> {
         let lexer =
             Lexer::new(
                 self.source,
@@ -36,7 +37,7 @@ impl<'a> W16CFrontend<'a> {
         let (tokens, table) =
             lexer.tokenize().map_err(|errs| {
                 errs.into_iter()
-                    .map(error::Error::from_lexer)
+                    .map(Error::from_lexer)
                     .collect::<Vec<_>>()
             })?;
 
@@ -46,22 +47,38 @@ impl<'a> W16CFrontend<'a> {
     }
 
     /// Получить AST (не нужно передавать токены).
-    pub fn get_ast(&mut self) -> Result<TranslationUnit, Vec<error::Error>> {
+    pub fn get_ast(&mut self) -> Result<TranslationUnit, Vec<Error>> {
         let tokens = self.get_tokens()?;
 
         Parser::new(tokens)
             .parse()
             .map_err(|err| {
-                vec![error::Error::from_parser(err)]
+                vec![Error::from_parser(err)]
             })
     }
 
-    /// Получить AST (нужно передать токены).
-    pub fn get_ast_from_tokens(tokens: Vec<Token>) -> Result<TranslationUnit, Vec<error::Error>> {
+    pub fn parse(tokens: Vec<Token>) -> Result<TranslationUnit, Vec<Error>> {
         Parser::new(tokens)
             .parse()
             .map_err(|err| {
-                vec![error::Error::from_parser(err)]
+                vec![Error::from_parser(err)]
             })
+    }
+
+    /// Семантический анализ
+    pub fn analyse(ast: TranslationUnit) -> Vec<Error> {
+        let mut resolver = Resolver::new();
+        let resolve_errors = resolver.resolve(&ast);
+
+        let mut checker = Checker::new(&resolver.symbols);
+
+        let mut errors: Vec<Error> =
+            resolve_errors.into_iter().map(Error::from_semantic).collect();
+
+        // checker.check возвращает Vec<SemanticError>, а не Result
+        let check_errors = checker.check(&ast);
+        errors.extend(check_errors.into_iter().map(Error::from_semantic));
+
+        errors
     }
 }

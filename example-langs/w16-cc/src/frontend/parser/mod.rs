@@ -1,4 +1,4 @@
-//! # Парсер C
+//! # Парсер C11
 //!
 //! Рекурсивный нисходящий парсер для операторов и объявлений.
 //! Алгоритм Пратта (Pratt parsing) для выражений — корректно
@@ -246,6 +246,7 @@ impl Parser {
 
         // struct / union / enum на верхнем уровне (только определение без переменной)
         if let Some(kind) = self.try_parse_tag_def()? {
+            self.expect(TokenKind::Semicolon)?;
             return Ok(Decl { span: start, kind });
         }
 

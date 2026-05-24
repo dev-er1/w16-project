@@ -107,7 +107,7 @@ impl Executer {
         let source = read_file(&file)?;
 
         // Каждая функция дебага выводит дамп напрямую в stdout.
-        let result = match stage {
+        let mut result = match stage {
             DbgStage::Tokens => debug_hir_tokens(&source),
             DbgStage::Hir => debug_hir_ast(&source),
             DbgStage::Mir => debug_mir_ast(&source),
@@ -116,8 +116,9 @@ impl Executer {
             DbgStage::Full => W16::debug_full_pipeline(&source),
         };
 
-        result.map_err(|e| CLIError::new(CliErrorKind::Runtime(e.to_string())))?;
+        result = Ok(result.map_err(|e| CLIError::new(CliErrorKind::Runtime(e.to_string())))?);
 
+        println!("{result:#?}");
         Ok(())
     }
 

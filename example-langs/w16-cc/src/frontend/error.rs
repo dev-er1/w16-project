@@ -5,13 +5,16 @@
 //! Сюда приходят все ошибки, и диагностика, и всё выводится на экран.
 use std::fmt;
 
-use crate::frontend::{lexer::{lexer_error::LexerError, token::Span}, parser::ParseError};
+use crate::frontend::{lexer::{lexer_error::LexerError, token::Span}, parser::ParseError, semantic::error::SemanticError};
 
+#[derive(Debug)]
 pub enum WhichError {
     LexerError(LexerError),
-    ParserError(ParseError)
+    ParserError(ParseError),
+    SemanticError(SemanticError)
 }
 
+#[derive(Debug)]
 pub struct Error {
     pub error: WhichError,
     pub msg: Option<String>,
@@ -23,6 +26,7 @@ impl fmt::Display for Error {
         match &self.error {
             WhichError::LexerError(err) => write!(f, "{err}"),
             WhichError::ParserError(err) => write!(f, "{err}"),
+            WhichError::SemanticError(err) => write!(f, "{err}"),
         }
     }
 }
@@ -33,6 +37,7 @@ impl Error {
         match &self.error {
             WhichError::LexerError(err) => err.pos,
             WhichError::ParserError(err) => err.pos,
+            WhichError::SemanticError(err) => err.span,
         }
     }
 
@@ -66,6 +71,7 @@ impl Error {
         }
     }
 
+    /// Получить [`Error`] из [`LexerError`]
     pub fn from_lexer(err: LexerError) -> Self {
         Self {
             error: WhichError::LexerError(err),
@@ -74,9 +80,19 @@ impl Error {
         }
     }
 
+    /// Получить [`Error`] из [`ParseError`]
     pub fn from_parser(err: ParseError) -> Self {
         Self {
             error: WhichError::ParserError(err),
+            msg: None,
+            diagnostic: None,
+        }
+    }
+
+    /// Получить [`Error`] из [`SemanticError`]
+    pub fn from_semantic(err: SemanticError) -> Self {
+        Self {
+            error: WhichError::SemanticError(err),
             msg: None,
             diagnostic: None,
         }

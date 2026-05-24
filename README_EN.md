@@ -5,11 +5,41 @@
   <img src="w16-logo.png" width="400">
 </div>
 
+This project under license [Apache 2.0](LICENSE).
+
 *I will have exams soon, so the project may not be updated.*
 
 # W16
 
 W16 is a runtime with a multi-level IR pipeline (HIR -> MIR -> Bytecode) with support for interpretation and JIT compilation.
+
+## Статус
+
+- HIR: Stable
+- MIR: Stable
+- Bytecode VM: Stable
+- Interpreter: Stable
+- JIT: Stable
+- AOT: Experimental
+
+## CLI
+```text
+- run <file>     — Run program throught                      .
+  - -i                                      — Interpretation
+  - -j                                      — JIT-compilation
+  - --time       — Show execute time.
+
+- dbg <stage>    — Debug.
+  - tokens
+  - hir
+  - mir
+  - mir-opt
+  - bytecode
+  - full
+
+- build <file>   — Compile programm (unstable !)
+- version        — CLI version
+```
 
 ## Are there already languages using W16?
 

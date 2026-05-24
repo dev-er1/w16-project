@@ -460,6 +460,8 @@ impl Parser {
             TokenKind::GreaterEqual => (BinaryOp::Ge, 5),
             TokenKind::Plus => (BinaryOp::Add, 6),
             TokenKind::Minus => (BinaryOp::Sub, 6),
+            TokenKind::Shl => (BinaryOp::Shl, 6),
+            TokenKind::Shr => (BinaryOp::Shr, 6),
             TokenKind::Star => (BinaryOp::Mul, 7),
             TokenKind::Slash => (BinaryOp::Div, 7),
             TokenKind::Percent => (BinaryOp::Rem, 7),
@@ -498,11 +500,7 @@ impl Parser {
         }
     }
 
-    fn expect_simple(
-        &mut self,
-        expected: &TokenKind,
-        message: impl Into<String>,
-    ) -> Result<(), ParseError> {
+    fn expect_simple(&mut self, expected: &TokenKind, message: impl Into<String>) -> Result<(), ParseError> {
         if self.eat(expected) {
             Ok(())
         } else {

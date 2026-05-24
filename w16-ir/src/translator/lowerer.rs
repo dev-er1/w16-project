@@ -764,6 +764,11 @@ fn lower_expr(ctx: &mut Ctx, expr: &Expr, constants: &mut Vec<MIRConstant>) -> V
                 BinaryOp::BitOr => ctx.emit(MIRInst::Or(l, r)),
                 BinaryOp::BitXor => ctx.emit(MIRInst::Xor(l, r)),
 
+                BinaryOp::Shl => ctx.emit(MIRInst::Shl(l, r)),
+                BinaryOp::Shr => match lty {
+                    Type::I64 => ctx.emit(MIRInst::Sar(l, r)), // арифметический сдвиг для знаковых
+                    _ => ctx.emit(MIRInst::Shr(l, r)),           // логический для беззнаковых
+                },
                 // Сравнения: F64 -> FCmp; I64 -> signed ICmp; иначе unsigned ICmp
                 BinaryOp::Eq => cmp(ctx, l, r, lty, ICmpOp::Eq, ICmpOp::Eq, FCmpOp::Eq),
                 BinaryOp::Ne => cmp(ctx, l, r, lty, ICmpOp::Ne, ICmpOp::Ne, FCmpOp::Ne),

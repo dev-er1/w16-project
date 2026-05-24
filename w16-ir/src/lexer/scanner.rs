@@ -132,6 +132,8 @@ impl<'a> Lexer<'a> {
             b'>' => {
                 if self.eat(b'=') {
                     TokenKind::GreaterEqual
+                } else if self.eat(b'>') {
+                    TokenKind::Shr
                 } else {
                     TokenKind::Greater
                 }
@@ -139,6 +141,8 @@ impl<'a> Lexer<'a> {
             b'-' => {
                 if self.eat(b'>') {
                     TokenKind::Arrow
+                } else if self.eat(b'<') {
+                    TokenKind::Shl
                 } else {
                     TokenKind::Minus
                 }

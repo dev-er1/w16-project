@@ -270,12 +270,11 @@ impl<'a> HirVerifier<'a> {
                     }
                     BinaryOp::Eq | BinaryOp::Ne if lhs_ty != Type::Unit => Some(Type::Bool),
                     BinaryOp::Lt | BinaryOp::Le | BinaryOp::Gt | BinaryOp::Ge
-                        if is_numeric(lhs_ty) =>
-                    {
+                        if is_numeric(lhs_ty) => {
                         Some(Type::Bool)
                     }
                     _ => {
-                        self.error(format!("invalid binary {:?} for {:?}", op, lhs_ty));
+                        self.error(format!("invalid binary {op:?} for {lhs_ty:?}"));
                         None
                     }
                 }

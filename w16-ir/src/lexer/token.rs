@@ -121,6 +121,9 @@ pub enum TokenKind {
     /// `>=`.
     GreaterEqual,
 
+    Shl,
+    Shr,
+
     /// Конец файла.
     Eof,
 }

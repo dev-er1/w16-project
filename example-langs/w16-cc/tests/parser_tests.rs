@@ -1,5 +1,6 @@
 use w16_cc::W16CFrontend;
 use w16_cc::frontend::parser::node::*;
+use w16_cc::frontend::string_pool::StringTable;
 use w16_cc::types::Type;
 
 // ---------------------------------------------------------------------------
@@ -8,8 +9,9 @@ use w16_cc::types::Type;
 
 /// Парсит строку и возвращает `TranslationUnit`. Паникует при ошибке.
 fn parse(src: &str) -> TranslationUnit {
-    W16CFrontend::new(src)
-        .get_ast()
+    let (tokens, _) = W16CFrontend::lex(src, StringTable::new()).unwrap();
+    
+    W16CFrontend::parse(tokens)
         .unwrap_or_else(|errs| {
             panic!("parse error(s):\n{errs:#?}");
         })
@@ -17,7 +19,10 @@ fn parse(src: &str) -> TranslationUnit {
 
 /// Парсит строку и ожидает ошибку парсера.
 fn parse_err(src: &str) {
-    let result = W16CFrontend::new(src).get_ast();
+    let (tokens, _) = W16CFrontend::lex(src, StringTable::new()).unwrap();
+    
+    let result = W16CFrontend::parse(tokens);
+    
     assert!(result.is_err(), "expected parse error, but got Ok");
 }
 

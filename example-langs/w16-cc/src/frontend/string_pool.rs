@@ -1,4 +1,4 @@
-//! *Код был взять из [karbon](../../../karbon/string_table.rs).*
+//! *Код был взят из [karbon](../../../karbon/string_table.rs).*
 use std::collections::HashMap;
 
 /// Само "хранилище" всех строк,

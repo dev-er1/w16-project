@@ -91,11 +91,10 @@ impl Tokenizer {
                 tokens.push(Token::LongFlag(arg.clone()));
 
                 // Смотрим на следующий аргумент: если он не флаг — это значение текущего флага.
-                if let Some(next) = args.get(i + 1) {
-                    if !next.starts_with('-') {
+                if let Some(next) = args.get(i + 1) && !next.starts_with('-') {
                         tokens.push(Token::FlagValue(next.clone()));
                         iter.next(); // потребляем токен значения
-                    }
+                    
                 }
             } else if arg.starts_with('-') {
                 // Короткий флаг: `-i`, `-j` и т.д.

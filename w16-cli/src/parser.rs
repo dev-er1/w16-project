@@ -124,11 +124,9 @@ fn has_long(tokens: &[Token], flag: &str) -> bool {
 #[allow(dead_code)]
 fn long_flag_value<'a>(tokens: &'a [Token], flag: &str) -> Option<&'a str> {
     let mut iter = tokens.iter().peekable();
-    while let Some(tok) = iter.next() {
-        if matches!(tok, Token::LongFlag(s) if s == flag) {
-            if let Some(Token::FlagValue(val)) = iter.peek() {
-                return Some(val.as_str());
-            }
+    while let Some(tok) = iter.next() && matches!(tok, Token::LongFlag(s) if s == flag) {
+        if let Some(Token::FlagValue(val)) = iter.peek() {
+            return Some(val.as_str());
         }
     }
     None

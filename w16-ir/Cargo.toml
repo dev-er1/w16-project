@@ -6,4 +6,4 @@ license = "Apache-2.0"
 description = "Промежуточное представление w16, и оптимизации"
 
 [dependencies]
-w16-core = { path = "../w16-core" }
+w16-core = { version = "0.1.0", path = "../w16-core" }

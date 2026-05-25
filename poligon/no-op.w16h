@@ -1,5 +1,0 @@
-module main {
-    fn @main() -> u64 {
-        return 67;
-    }
-}

@@ -10,14 +10,6 @@
 *.dylib
 *.pdb
 
-# Готовые утилиты в папке тестов, и в сравнениях
-poligon/
-comparisons/
-
-# --- Логи и временные файлы ---
-poligon/logs.txt
-*.log
-
 # --- Специфично для Windows / IDE ---
 .DS_Store
 Thumbs.db

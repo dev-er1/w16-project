@@ -57,7 +57,7 @@ impl Error {
                 
                 print!(" {padding}|\x1b[0m ");
                 if col_num > 0 {
-                    eprint!("{}", " ".repeat((col_num - 1).try_into().unwrap()));
+                    print!("{}", " ".repeat((col_num - 1).try_into().unwrap()));
                 }
                 println!("\x1b[1;31m^~~~\x1b[0m");
             }

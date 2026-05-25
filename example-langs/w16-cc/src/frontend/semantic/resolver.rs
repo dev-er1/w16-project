@@ -248,7 +248,7 @@ impl Resolver {
             }
 
             ExprKind::Unary { operand, .. } => self.resolve_expr(operand),
-            ExprKind::Cast  { expr: e, .. } => self.resolve_expr(e),
+            ExprKind::Cast { expr: e, .. } => self.resolve_expr(e),
             ExprKind::Sizeof(SizeofArg::Expr(e)) => self.resolve_expr(e),
             ExprKind::Sizeof(SizeofArg::Type(_)) => {}
             ExprKind::Alignof(_) => {}

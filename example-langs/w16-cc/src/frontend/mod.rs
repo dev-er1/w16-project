@@ -78,7 +78,7 @@ impl<'a> W16CFrontend<'a> {
 
     /// Главная сквозная точка входа. Запускает полный цикл:
     /// Лексический анализ -> Синтаксический анализ -> Семантический анализ.
-    pub fn compile_all(mut self) -> Result<TranslationUnit, Vec<Error>> {
+    pub fn compile_all(&mut self) -> Result<TranslationUnit, Vec<Error>> {
         // 1. Лексер
         let tokens = self.run_step(SourceStep)?;
         

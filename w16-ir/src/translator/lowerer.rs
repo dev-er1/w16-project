@@ -620,9 +620,9 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
         }
 
         Stmt::DoWhile { body, cond } => {
-            let body_blk   = ctx.new_block("do_body");
+            let body_blk = ctx.new_block("do_body");
             let header_blk = ctx.new_block("do_header");
-            let exit_blk   = ctx.new_block("do_exit");
+            let exit_blk = ctx.new_block("do_exit");
 
             ctx.loop_exit_stack.push(exit_blk);
             ctx.loop_header_stack.push(header_blk);

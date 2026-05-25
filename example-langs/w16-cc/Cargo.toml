@@ -4,3 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+w16-ir = { path = "../../w16-ir" }
+w16-lib = { path = "../../w16-lib" }

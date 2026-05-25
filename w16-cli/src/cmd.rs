@@ -131,7 +131,7 @@ pub enum CommandKind {
 ///
 /// ```text
 /// w16 run main.w16h -j
-///     ^^^     |      |    -> kind = CommandKind::Run
+///     ^^^     ↑     /|\   -> kind = CommandKind::Run
 ///         ^^^^^^^^^  |    -> file = Some("main.w16h")
 ///                   ^^^   -> flags = CommandFlags { run_mode: Jit }
 /// ```

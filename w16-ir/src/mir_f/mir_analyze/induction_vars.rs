@@ -59,7 +59,7 @@ pub enum IVKind {
     Linear { base: i64, step: Step },
 
     /// Сумма линейной IV: value(k) = base_sum + sum(0..k-1)(base_iv + step_iv * j)
-    ///                                                                              = base_sum + base_iv*k + step_iv * k*(k-1)/2
+    ///                                                                  = base_sum + base_iv*k + step_iv * k*(k-1)/2
     /// Пример: `$sum += $i` где $i — Linear(0, 1)
     /// -> $sum(N) = 0 + 0*N + 1 * N*(N-1)/2 = N*(N-1)/2
     SumOfLinear {

@@ -6,3 +6,8 @@ members = ["w16-cli",
     "w16-lib",
     "w16c"
 ]
+
+exclude = [
+    "comparisons/*",
+    "poligon/*",
+]

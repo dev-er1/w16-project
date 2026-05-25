@@ -178,6 +178,15 @@ impl<'a> HirVerifier<'a> {
                 scopes.pop();
             }
             
+            Stmt::DoWhile { body, cond } => {
+                scopes.push();
+                self.loop_depth += 1;
+                self.verify_stmts(body, return_ty, scopes);
+                self.loop_depth -= 1;
+                scopes.pop();
+                self.expect_expr_type(cond, Type::Bool, scopes, "`do-while` condition");
+            }
+
             Stmt::Break => {
                 if self.loop_depth == 0 {
                     self.error("`break` outside of loop");

@@ -619,6 +619,74 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
             ctx.loop_header_stack.pop();
         }
 
+        Stmt::DoWhile { body, cond } => {
+            let body_blk   = ctx.new_block("do_body");
+            let header_blk = ctx.new_block("do_header");
+            let exit_blk   = ctx.new_block("do_exit");
+
+            ctx.loop_exit_stack.push(exit_blk);
+            ctx.loop_header_stack.push(header_blk);
+
+            // Снимок locals — те же phi как в While
+            let loop_vars: Vec<(String, ValueId)> = ctx
+                .locals.iter().map(|(n, &id)| (n.clone(), id)).collect();
+
+            let mut header_params: Vec<(ValueId, Type)> = Vec::new();
+            let mut phi_locals: HashMap<String, ValueId> = HashMap::new();
+            for (name, pre_id) in &loop_vars {
+                let ty = ctx.ty(*pre_id);
+                let param_id = ctx.new_value(ty, ValueDef::Param(header_blk));
+                header_params.push((param_id, ty));
+                phi_locals.insert(name.clone(), param_id);
+            }
+            ctx.blocks[header_blk].params = header_params;
+
+            // Сразу прыгаем в тело (без проверки условия)
+            let pre_args: Vec<ValueId> = loop_vars.iter().map(|(_, id)| *id).collect();
+            ctx.set_term(MIRTerminator::Jmp { target: body_blk, args: pre_args.clone() });
+
+            // Body
+            ctx.switch_to(body_blk);
+            for (name, &param_id) in &phi_locals {
+                ctx.locals.insert(name.clone(), param_id);
+            }
+            for s in body {
+                lower_stmt(ctx, s, constants);
+            }
+
+            // После тела — прыгаем в header для проверки условия
+            if !ctx.is_terminated() {
+                let back_args: Vec<ValueId> = loop_vars.iter().map(|(name, _)| {
+                    *ctx.locals.get(name.as_str())
+                        .unwrap_or_else(|| phi_locals.get(name.as_str()).unwrap())
+                }).collect();
+                ctx.set_term(MIRTerminator::Jmp { target: header_blk, args: back_args });
+            }
+
+            // Header: проверяем условие
+            ctx.switch_to(header_blk);
+            for (name, &param_id) in &phi_locals {
+                ctx.locals.insert(name.clone(), param_id);
+            }
+            let cond_val = lower_expr(ctx, cond, constants);
+            ctx.set_term(MIRTerminator::Br {
+                cond: cond_val,
+                then_blk: body_blk,  // истина → снова в тело
+                then_args: Vec::new(),
+                else_blk: exit_blk,  // ложь → выход
+                else_args: Vec::new(),
+            });
+
+            // Exit
+            ctx.switch_to(exit_blk);
+            for (name, &param_id) in &phi_locals {
+                ctx.locals.insert(name.clone(), param_id);
+            }
+
+            ctx.loop_exit_stack.pop();
+            ctx.loop_header_stack.pop();
+        }
+
         Stmt::Break => {
             let exit = *ctx.loop_exit_stack.last()
                 .expect("break should be in loop");

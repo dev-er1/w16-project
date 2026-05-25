@@ -174,6 +174,17 @@ impl Parser {
             });
         }
 
+        if self.at(&TokenKind::Do) {
+            self.bump();
+            let body = self.parse_block_body()?;
+            self.expect_simple(&TokenKind::While, "expected `while` after `do` body")?;
+            self.expect_simple(&TokenKind::LParen, "expected `(`")?;
+            let cond = self.parse_expr()?;
+            self.expect_simple(&TokenKind::RParen, "expected `)`")?;
+            self.eat_optional_semicolon();
+            return Ok(Stmt::DoWhile { body, cond });
+        }
+
         if self.at(&TokenKind::While) {
             self.bump();
             self.expect_simple(&TokenKind::LParen, "expected `(` after `while`")?;

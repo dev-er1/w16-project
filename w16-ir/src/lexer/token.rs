@@ -28,26 +28,40 @@ pub struct Token {
 pub enum TokenKind {
     /// `module`.
     Module,
+
     /// `const`.
     Const,
+
     /// `fn`.
     Fn,
+
     /// `let`.
     Let,
+
     /// `if`.
     If,
+
     /// `else`.
     Else,
+
     /// `while`.
     While,
+
+    /// `do`
+    Do,
+
     /// `return`.
     Return,
+
     /// `halt`.
     Halt,
+
     /// `print`.
     Print,
+
     /// `true`.
     True,
+
     /// `false`.
     False,
 

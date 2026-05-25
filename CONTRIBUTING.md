@@ -1,3 +1,4 @@
+<!-- You better to read this file in review mode -->
 *This file is translate of [CONTRIBUTING_RU.md](CONTRIBUTING_RU.md)*
 # Contributing to W16
 

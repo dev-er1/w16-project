@@ -480,8 +480,8 @@ fn verify_inst(
     }
 
     // Проверяем что у результата правильный тип (совпадает с infer_type)
-    if let Some(rid) = result_id {
-        if rid < func.value_types.len() {
+    if let Some(rid) = result_id
+        && rid < func.value_types.len() {
             let actual_ty = func.value_types[rid];
             let expected_ty = crate::translator::lowerer::infer_type(inst);
             if actual_ty != expected_ty {
@@ -494,7 +494,6 @@ fn verify_inst(
                 ));
             }
         }
-    }
 }
 
 /// Проверяет допустимость комбинации src_ty -> dest_ty для данного CastKind.

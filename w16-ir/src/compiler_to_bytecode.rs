@@ -439,7 +439,7 @@ fn compile_inst(
 ) -> Result<(), CompilerError> {
     // Если результат мёртвый (DCE пометил is_dead) — пропускаем инструкцию
     // за исключением Store и Call у которых есть side-effects.
-    let is_dead_result = result_id.map_or(true, |id| func.values[id].is_dead);
+    let is_dead_result = result_id.is_none_or(|id| func.values[id].is_dead);
     match inst {
         MIRInst::Store { .. } | MIRInst::Call { .. } => {} // side-effects — не пропускаем
         _ if is_dead_result => return Ok(()),

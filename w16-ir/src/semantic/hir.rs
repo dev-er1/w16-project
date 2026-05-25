@@ -396,11 +396,11 @@ impl ScopeStack {
 
     fn declare(&mut self, name: String, ty: Type) -> bool {
         let scope = self.scopes.last_mut().expect("scope stack cannot be empty");
-        if scope.contains_key(&name) {
-            false
-        } else {
-            scope.insert(name, ty);
+        if let std::collections::hash_map::Entry::Vacant(e) = scope.entry(name) {
+            e.insert(ty);
             true
+        } else {
+            false
         }
     }
 

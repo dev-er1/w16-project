@@ -430,11 +430,9 @@ pub fn compute_all_analysis(module: &mut MIRModule) {
                 if let MIRInst::Call {
                     func: callee_id, ..
                 } = inst
-                {
-                    if *callee_id < n {
+                    && *callee_id < n {
                         call_site_counts[*callee_id] += 1;
                     }
-                }
             }
         }
     }

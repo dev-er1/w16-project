@@ -132,15 +132,14 @@ fn constant_folding(module: &mut MIRModule, func_id: FunctionId) -> usize {
         let mut cv = Vec::new();
         for block in func.live_blocks() {
             for (inst_idx, inst) in block.instructions.iter().enumerate() {
-                if let MIRInst::Const(cid) = inst {
-                    if let Some(val_id) = func
+                if let MIRInst::Const(cid) = inst
+                    && let Some(val_id) = func
                         .values
                         .iter()
                         .position(|v| v.def == crate::mir::ValueDef::Inst(block.id, inst_idx))
                     {
                         cv.push((val_id, *cid));
                     }
-                }
             }
         }
         cv
@@ -429,8 +428,8 @@ fn dead_code_elimination(module: &mut MIRModule, func_id: FunctionId) -> usize {
 
         // Освобождаем uses операндов: они могут стать мёртвыми тоже
         let def = func.values[val_id].def.clone();
-        if let crate::mir::ValueDef::Inst(block_id, inst_idx) = def {
-            if let Some(inst) = func.blocks[block_id].instructions.get(inst_idx).cloned() {
+        if let crate::mir::ValueDef::Inst(block_id, inst_idx) = def
+            && let Some(inst) = func.blocks[block_id].instructions.get(inst_idx).cloned() {
                 let operands = inst_operands_for_dce(&inst);
                 for operand in operands {
                     if operand < func.values.len() {
@@ -446,7 +445,6 @@ fn dead_code_elimination(module: &mut MIRModule, func_id: FunctionId) -> usize {
                     }
                 }
             }
-        }
     }
 
     changes

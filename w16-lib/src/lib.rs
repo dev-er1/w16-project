@@ -126,19 +126,12 @@ impl From<VMError> for W16Error {
 
 /// Удобный builder для повторного использования настроек.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub struct W16 {
     compile: CompileOptions,
     run: RunOptions,
 }
 
-impl Default for W16 {
-    fn default() -> Self {
-        Self {
-            compile: CompileOptions::default(),
-            run: RunOptions::default(),
-        }
-    }
-}
 
 impl W16 {
     /// Создать фасад с настройками по умолчанию.
@@ -212,19 +205,19 @@ impl W16 {
         
         // Tokens
         output.push_str(&debug_hir_tokens(source)?);
-        output.push_str("\n");
+        output.push('\n');
         
         // HIR AST
         output.push_str(&debug_hir_ast(source)?);
-        output.push_str("\n");
+        output.push('\n');
         
         // MIR AST (без оптимизаций)
         output.push_str(&debug_mir_ast(source)?);
-        output.push_str("\n");
+        output.push('\n');
         
         // MIR AST (с оптимизациями)
         output.push_str(&debug_mir_ast_optimized(source)?);
-        output.push_str("\n");
+        output.push('\n');
         
         // Bytecode
         output.push_str(&debug_bytecode(source)?);

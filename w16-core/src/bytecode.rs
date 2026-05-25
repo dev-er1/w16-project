@@ -249,6 +249,12 @@ pub struct ConstantPool {
     pub data: Vec<u8>,
 }
 
+impl Default for ConstantPool {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ConstantPool {
     pub fn new() -> Self {
         Self { data: Vec::new() }

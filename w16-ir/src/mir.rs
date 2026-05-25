@@ -399,8 +399,8 @@ fn replace_in_terminator(term: &mut MIRTerminator, old: ValueId, new: ValueId) {
         MIRTerminator::Jmp { args, .. } => args.iter_mut().for_each(patch),
         MIRTerminator::Br { cond, then_args, else_args, .. } => {
             patch(cond);
-            then_args.iter_mut().for_each(|v| patch(v));
-            else_args.iter_mut().for_each(|v| patch(v));
+            then_args.iter_mut().for_each(&patch);
+            else_args.iter_mut().for_each(&patch);
         }
         MIRTerminator::Ret(vals) => vals.iter_mut().for_each(patch),
         MIRTerminator::Halt => {}

@@ -127,6 +127,12 @@ struct Imports {
     print_str: FuncId,
 }
 
+impl Default for JIT {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl JIT {
     /// Создать новый экземпляр JIT-компилятора.
     ///

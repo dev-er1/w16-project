@@ -108,7 +108,7 @@ fn run_on_function(module: &mut MIRModule, func_id: FunctionId) -> usize {
             .iter()
             .all(|(phi_id, _)| iv_analysis.ivs.contains_key(phi_id));
         for (phi_id, _) in &header_params {
-            if let Some(_) = iv_analysis.ivs.get(phi_id) {}
+            if iv_analysis.ivs.contains_key(phi_id) {}
         }
         if !all_covered {
             continue;

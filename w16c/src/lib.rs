@@ -49,7 +49,7 @@ pub fn compile_to_executable(
         if let Some(tool) = cc::windows_registry::find_tool(target.to_string().as_str(), "link.exe")
         {
             let mut c = tool.to_command();
-            c.args(&[
+            c.args([
                 &obj_file,
                 &runtime_lib,
                 "kernel32.lib",
@@ -62,7 +62,7 @@ pub fn compile_to_executable(
         } else {
             // Фолбек на случай, если Visual Studio не установлена (например, стоит MinGW gcc)
             let mut c = Command::new("link.exe");
-            c.args(&[
+            c.args([
                 &obj_file,
                 &runtime_lib,
                 "kernel32.lib",
@@ -76,7 +76,7 @@ pub fn compile_to_executable(
     } else {
         // Для Linux / macOS оставляем стандартный cc
         let mut c = Command::new("cc");
-        c.args(&[&obj_file, "-o", &exe_file]);
+        c.args([&obj_file, "-o", &exe_file]);
         c
     };
 

@@ -245,15 +245,14 @@ impl Parser {
             return Ok(Stmt::Print(args));
         }
 
-        if let TokenKind::Local(name) = self.peek().kind.clone() {
-            if self.peek_n(1).map(|t| &t.kind) == Some(&TokenKind::Equal) {
+        if let TokenKind::Local(name) = self.peek().kind.clone()
+            && self.peek_n(1).map(|t| &t.kind) == Some(&TokenKind::Equal) {
                 self.bump();
                 self.bump();
                 let value = self.parse_expr()?;
                 self.eat_optional_semicolon();
                 return Ok(Stmt::Assign { name, value });
             }
-        }
 
         let expr = self.parse_expr()?;
         self.eat_optional_semicolon();

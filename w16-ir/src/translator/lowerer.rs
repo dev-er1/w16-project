@@ -478,7 +478,7 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
                 .cloned()
                 .collect();
 
-            let needs_phi = !changed_names.is_empty() && !(then_terminated && else_terminated);
+            let needs_phi = !(changed_names.is_empty() || then_terminated && else_terminated);
 
             if needs_phi {
                 for name in &changed_names {
@@ -516,14 +516,12 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
                         args,
                     };
                 }
+            } else if !then_terminated && else_terminated {
+                ctx.locals = then_locals;
+            } else if then_terminated && !else_terminated {
+                ctx.locals = else_locals;
             } else {
-                if !then_terminated && else_terminated {
-                    ctx.locals = then_locals;
-                } else if then_terminated && !else_terminated {
-                    ctx.locals = else_locals;
-                } else {
-                    ctx.locals = pre_if_locals;
-                }
+                ctx.locals = pre_if_locals;
             }
         }
 

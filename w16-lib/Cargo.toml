@@ -2,7 +2,11 @@
 name = "w16-lib"
 version = "0.1.0"
 edition = "2024"
+license = "Apache-2.0"
+description = "Библиотека для использования W16"
+readme = "W16-LIB.md"
+repository = "https://github.com/dev-er1/w16-project"
 
 [dependencies]
-w16-core = { path = "../w16-core" }
-w16-ir = { path = "../w16-ir" }
+w16-core = { version = "0.1.0", path = "../w16-core" }
+w16-ir = { version = "0.1.0", path = "../w16-ir" }

@@ -9,11 +9,10 @@
 *.so
 *.dylib
 *.pdb
+w16-project workspace.code-workspace
 
 # --- Специфично для Windows / IDE ---
-.DS_Store
 Thumbs.db
-.idea/
 .vscode/
 *.suo
 *.ntvs*

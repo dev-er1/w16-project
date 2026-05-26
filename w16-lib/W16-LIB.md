@@ -23,9 +23,41 @@ cargo add w16-lib
 use w16_lib::{run_hir_text_as, ExecutionMode};
 
 fn main() {
-    let source: String = /* HIR в виде текста */;
+    let source: &str = /* HIR в виде текста */;
 
     /// Выполнить ваш W16 HIR в виде текста
-    let result: Result<RunResult, W16Error> = run_hir_text_as(&source, ExecutionMode::Interpreter /* Либо "ExecutionMode::Jit", если хотите JIT-компилировать*/)
+    let result: Result<RunResult, W16Error> = run_hir_text_as(&source, ExecutionMode::Interpreter /* Либо "ExecutionMode::Jit", если хотите JIT-компилировать*/);
+}
+```
+
+## Как использовать w16 ( только примеры )
+
+- Выполнить текстовый HIR
+```rust
+use w16_lib::{run_hir_text_as, ExecutionMode};
+
+fn main() {
+    let source: &str = /* HIR в виде текста */;
+
+    /// Выполнить ваш W16 HIR в виде текста
+    let result: Result<RunResult, W16Error> = run_hir_text_as(&source, ExecutionMode::Interpreter /* Либо "ExecutionMode::Jit", если хотите JIT-компилировать*/);
+}
+```
+
+- Выполнить HIR в виде [`Module`]
+
+*Для этого подключите библиотеку `w16-ir`*:
+```bash
+cargo add w16-ir
+```
+
+```rust
+use w16_lib::{run_hir_text_as, ExecutionMode};
+use w16_ir::hir::Module;
+
+fn main() {
+    let source: Module = Module { name: /* Название модуля. String */, constants: /* Константы в модуле. Vec<ConstDecl> */, functions: /* Функции в модуле. Vec<Function> */};
+
+    let result: Result<RunResult, W16Error> = W16::new().run_hir_ast(&source);
 }
 ```

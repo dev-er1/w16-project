@@ -1126,7 +1126,7 @@ name = "w16-cli"
 version = "0.1.0"
 dependencies = [
  "target-lexicon",
- "w16-lib 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "w16-lib 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "w16c",
 ]
 
@@ -1171,7 +1171,7 @@ dependencies = [
 
 [[package]]
 name = "w16-lib"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proptest",
  "w16-core 0.1.0",
@@ -1180,9 +1180,9 @@ dependencies = [
 
 [[package]]
 name = "w16-lib"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f841bf380088d23ddece8a7c3f66ff7627eda4181827d5f47e4939809a8744e"
+checksum = "02c41879ea6aa9429aa34bf8d755924c9475fafe6a541218f7b66e49a7dc56ad"
 dependencies = [
  "w16-core 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "w16-ir 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",

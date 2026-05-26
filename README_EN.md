@@ -3,6 +3,13 @@
 
 <div align="center">
   <img src="w16-logo.png" width="400" alt="W16 Logo">
+
+  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+  [![Rust](https://img.shields.io/badge/rust-1.93.1%2B-orange.svg)](https://www.rust-lang.org)
+  [![Crates.io](https://img.shields.io/crates/v/w16-lib.svg)](https://crates.io/crates/w16-lib)
+  [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/dev-er1/w16-project)](https://github.com/dev-er1/w16-project/commits/main)
+  [![GitHub repo size](https://img.shields.io/github/repo-size/dev-er1/w16-project)](https://github.com/dev-er1/w16-project)
+  [![GitHub release](https://img.shields.io/github/v/release/dev-er1/w16-project?style=flat-square)](https://github.com/dev-er1/w16-project/releases)
 </div>
 
 <p align="center">

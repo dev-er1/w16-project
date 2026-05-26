@@ -13,8 +13,6 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-> **Note:** Due to upcoming exams (intensive preparation until May 26), project development activity may temporarily decrease. Your Issues and Pull Requests are highly welcome!
-
 ## What is W16?
 
 **W16** is a ready-to-use execution infrastructure (runtime) for creators of new programming languages. 

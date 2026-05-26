@@ -25,7 +25,7 @@ pub struct FlagUsage {
     pub description: &'static str,
 }
  
-/// Глобальный реестр всех команд CLI.
+/// # Глобальный реестр всех команд CLI.
 ///
 /// `help` итерирует этот срез — ничего не захардкожено в тексте.
 pub const COMMANDS: &[CommandUsage] = &[

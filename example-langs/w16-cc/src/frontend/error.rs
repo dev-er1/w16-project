@@ -1,4 +1,4 @@
-// example-langs\src\frontend\error.rs
+// example-langs\w16-cc\src\frontend\error.rs
 //
 //! # Вывод ошибок и диагностика
 //! 
@@ -45,29 +45,36 @@ impl Error {
     pub fn report_error(&self, source_code: &str) {
         let (line_num, col_num) = self.span().start_line_and_col;
         
+        // Главное сообщение об ошибке
         println!("\x1b[1;31merror\x1b[0m: \x1b[1m{self}\x1b[0m");
-        println!("{line_num}:{col_num} (line:column)");
+        println!("line and col: {line_num}:{col_num}");
 
         if line_num > 0 {
-            if let Some(source_line) = source_code.lines().nth((line_num - 1).try_into().unwrap()) {
-                let gutter = format!(" \x1b[1;97m{line_num}\x1b[0m \x1b[33m|\x1b[0m ");
-                let padding = " ".repeat(gutter.len() - 3);
+            if let Some(source_line) = source_code.lines().nth((line_num - 1) as usize) {
+                let line_num_str = line_num.to_string();
+                let padding = " ".repeat(line_num_str.len());
                 
-                println!(" {padding}|\x1b[0m {source_line}");
+                // Пустой разделитель сверху
+                println!(" {padding} \x1b[1;34m|\x1b[0m");
                 
-                print!(" {padding}|\x1b[0m ");
+                // Строка кода с номером строки
+                println!(" \x1b[1;34m{line_num}\x1b[0m \x1b[1;34m|\x1b[0m {source_line}");
+                
+                // Указатель на ошибку (стрелочки ^~~~)
+                print!(" {padding} \x1b[1;34m|\x1b[0m ");
                 if col_num > 0 {
-                    print!("{}", " ".repeat((col_num - 1).try_into().unwrap()));
+                    print!("{}", " ".repeat((col_num - 1) as usize));
                 }
-                println!("\x1b[1;31m^~~~\x1b[0m");
+                println!("\x1b[1;31m^———\x1b[0m");
             }
         }
 
+        // Дополнительные заметки
         if let Some(custom_msg) = &self.msg {
-            println!("  \x1b[1;34m  note\x1b[0m: {custom_msg}");
+            println!("  \x1b[1;36mnote\x1b[0m: {custom_msg}");
         }
         if let Some(diag) = &self.diagnostic {
-            println!("  \x1b[1;32m  help\x1b[0m: {diag}");
+            println!("  \x1b[1;32mhelp\x1b[0m: {diag}");
         }
     }
 

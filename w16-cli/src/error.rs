@@ -5,7 +5,6 @@
 //! `CLIError` — единственный публичный тип ошибки для всего CLI.
 //! Содержит типизированный `CliErrorKind`, ноль или больше `Diagnostic`-ов
 //! (заметки / подсказки), и опциональную строку `usage` из реестра `COMMANDS`.
-
 use std::fmt;
 use crate::cmd::COMMANDS;
 

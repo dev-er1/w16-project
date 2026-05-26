@@ -1,7 +1,31 @@
-use w16_cc::W16C;
+//! CLI компилятора W16-CC.
+//!
+//! W16-CC транслирует C11 в W16-HIR и позволяет сразу запускать
+//! результат через VM или JIT, либо сохранять как текстовый `.w16h`.
+
+mod cli {
+    pub mod cmd;
+    pub mod error;
+    pub mod executer;
+    pub mod help;
+    pub mod tokenizer;
+    pub mod parser;
+}
+
+use cli::{
+    executer::Executer,
+    parser::Parser,
+    tokenizer::Tokenizer,
+};
 
 fn main() {
-    let code = "unsigned main() { return 67; }";
+    let tokens  = Tokenizer::tokenize();
+    let command = Parser::parse(&tokens).unwrap_or_else(|e| {
+        e.report();
+        std::process::exit(1);
+    });
 
-    W16C::execute_code_by_vm(&W16C::new(code));
+    if let Err(e) = Executer::execute(command) {
+        e.report();
+    }
 }

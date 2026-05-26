@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-w16-core = { path = "../w16-core" }
+w16-core = "0.1.0"
 
 cranelift-codegen = "0.131.1"
 cranelift-frontend = "0.131.1"

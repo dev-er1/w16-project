@@ -23,7 +23,7 @@ use super::symbol::{Symbol, SymbolTable};
 pub struct Checker<'a> {
     /// Таблица символов, построенная resolver-ом.
     symbols: &'a SymbolTable,
-    errors:  Vec<SemanticError>,
+    errors: Vec<SemanticError>,
 
     /// Тип возврата текущей функции.
     current_return_ty: Option<Type>,
@@ -39,10 +39,10 @@ impl<'a> Checker<'a> {
     pub fn new(symbols: &'a SymbolTable) -> Self {
         Self {
             symbols,
-            errors:  Vec::new(),
+            errors: Vec::new(),
             current_return_ty: None,
-            loop_depth:  0,
-            switch_depth:  0,
+            loop_depth: 0,
+            switch_depth: 0,
         }
     }
 
@@ -255,7 +255,7 @@ impl<'a> Checker<'a> {
                 if !self.compat(&ty_alt, &ty_then) {
                     self.error(expr.span, SemanticErrorKind::TypeMismatch {
                         expected: ty_then.clone(),
-                        got:  ty_alt,
+                        got: ty_alt,
                     });
                 }
                 ty_then
@@ -339,7 +339,7 @@ impl<'a> Checker<'a> {
                 if args.len() != params.len() {
                     self.error(span, SemanticErrorKind::ArgCountMismatch {
                         expected: params.len(),
-                        got:  args.len(),
+                        got: args.len(),
                     });
                 }
                 for (i, (arg, param_ty)) in args.iter().zip(params.iter()).enumerate() {
@@ -389,7 +389,7 @@ impl<'a> Checker<'a> {
                 if !self.is_arithmetic(lty) || !self.is_arithmetic(rty) {
                     self.error(span, SemanticErrorKind::TypeMismatch {
                         expected: Type::Int,
-                        got:  rty.clone(),
+                        got: rty.clone(),
                     });
                 }
                 self.usual_arith_conv(lty, rty)
@@ -400,7 +400,7 @@ impl<'a> Checker<'a> {
                 if !self.is_integer(lty) || !self.is_integer(rty) {
                     self.error(span, SemanticErrorKind::TypeMismatch {
                         expected: Type::Int,
-                        got:  rty.clone(),
+                        got: rty.clone(),
                     });
                 }
                 lty.clone()
@@ -439,7 +439,7 @@ impl<'a> Checker<'a> {
                 let got = self.infer(e);
                 if !self.compat(&got, expected) {
                     self.error(span, SemanticErrorKind::InitTypeMismatch {
-                        var_ty:  expected.clone(),
+                        var_ty: expected.clone(),
                         init_ty: got,
                     });
                 }

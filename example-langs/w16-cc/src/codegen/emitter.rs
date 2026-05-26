@@ -19,7 +19,7 @@ use w16_ir::hir::{
 
 /// Генератор текстового HIR.
 pub struct TextEmitter {
-    out:  String,
+    out: String,
     indent: usize,
 }
 

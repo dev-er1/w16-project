@@ -69,7 +69,7 @@ impl FnCtx {
 
 pub struct AstTranslator<'a> {
     strings: &'a StringTable,
-    errors:  Vec<TranslationError>,
+    errors: Vec<TranslationError>,
 }
 
 impl<'a> AstTranslator<'a> {
@@ -308,7 +308,7 @@ impl<'a> AstTranslator<'a> {
 
         // Группируем: Vec<(условия, тело)> + опциональный default
         struct Case {
-            values:  Vec<HirExpr>,   // пустой = default
+            values: Vec<HirExpr>,   // пустой = default
             stmts: Vec<HirStmt>,
         }
 
@@ -367,16 +367,16 @@ impl<'a> AstTranslator<'a> {
             } else {
                 // case v1, v2, ...: cond = (sw == v1 || sw == v2 || ...)
                 let mut cond = HirExpr::Binary {
-                    op:  HirBinOp::Eq,
+                    op: HirBinOp::Eq,
                     lhs: Box::new(HirExpr::Local(tmp.clone())),
                     rhs: Box::new(case.values[0].clone()),
                 };
                 for extra in case.values.into_iter().skip(1) {
                     cond = HirExpr::Binary {
-                        op:  HirBinOp::BitOr, // логическое ИЛИ через BitOr (семантика Bool)
+                        op: HirBinOp::BitOr, // логическое ИЛИ через BitOr (семантика Bool)
                         lhs: Box::new(cond),
                         rhs: Box::new(HirExpr::Binary {
-                            op:  HirBinOp::Eq,
+                            op: HirBinOp::Eq,
                             lhs: Box::new(HirExpr::Local(tmp.clone())),
                             rhs: Box::new(extra),
                         }),
@@ -536,12 +536,12 @@ impl<'a> AstTranslator<'a> {
                 let arr = self.translate_expr(array, ctx, out)?;
                 let idx = self.translate_expr(index, ctx, out)?;
                 let scaled = HirExpr::Binary {
-                    op:  HirBinOp::Mul,
+                    op: HirBinOp::Mul,
                     lhs: Box::new(idx),
                     rhs: Box::new(HirExpr::Literal(HirLit::Int(8))),
                 };
                 let addr = HirExpr::Binary {
-                    op:  HirBinOp::Add,
+                    op: HirBinOp::Add,
                     lhs: Box::new(arr),
                     rhs: Box::new(scaled),
                 };
@@ -601,7 +601,7 @@ impl<'a> AstTranslator<'a> {
         let val = self.translate_expr(expr, ctx, out)?;
         // В C любое ненулевое значение — истина. Сравниваем с 0.
         Ok(HirExpr::Binary {
-            op:  HirBinOp::Ne,
+            op: HirBinOp::Ne,
             lhs: Box::new(val),
             rhs: Box::new(HirExpr::Literal(HirLit::Int(0))),
         })
@@ -685,7 +685,7 @@ impl<'a> AstTranslator<'a> {
         } else {
             let hir_op = compound_assign_op(op);
             HirExpr::Binary {
-                op:  hir_op,
+                op: hir_op,
                 lhs: Box::new(HirExpr::Local(var_name.clone())),
                 rhs: Box::new(rhs_val.clone()),
             }
@@ -719,7 +719,7 @@ impl<'a> AstTranslator<'a> {
         let old = HirExpr::Local(var_name.clone());
         let one = HirExpr::Literal(HirLit::Int(1));
         let new_val = HirExpr::Binary {
-            op:  if is_inc { HirBinOp::Add } else { HirBinOp::Sub },
+            op: if is_inc { HirBinOp::Add } else { HirBinOp::Sub },
             lhs: Box::new(old.clone()),
             rhs: Box::new(one),
         };

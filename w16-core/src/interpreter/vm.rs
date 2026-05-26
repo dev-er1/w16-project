@@ -289,7 +289,7 @@ unsafe fn op_noop(_: &mut VM, _: &Bytecode, _: Instruction, ip: &mut usize) {
 }
 
 /// Остановка виртуальной машины.
-/// Выставляем sentinel -- цикл завершится на следующей проверке while ip < code_len.
+/// Выставляем sentinel — цикл завершится на следующей проверке while ip < code_len.
 #[inline(always)]
 unsafe fn op_halt(_: &mut VM, _: &Bytecode, _: Instruction, ip: &mut usize) {
     *ip = HALT_SENTINEL;

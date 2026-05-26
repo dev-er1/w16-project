@@ -10,3 +10,6 @@ repository = "https://github.com/dev-er1/w16-project"
 [dependencies]
 w16-core = { version = "0.1.0", path = "../w16-core" }
 w16-ir = { version = "0.1.0", path = "../w16-ir" }
+
+[dev-dependencies]
+proptest = "1.11.0"

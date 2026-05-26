@@ -75,24 +75,13 @@ pub enum JitError {
 impl fmt::Display for JitError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            JitError::UnsupportedOpcode { ip, opcode } => {
-                write!(f, "JIT does not support {opcode:?} at ip {ip}")
-            }
-            JitError::ConstantPoolOutOfBounds { ip, offset } => {
-                write!(
+            JitError::UnsupportedOpcode { ip, opcode } => write!(f, "JIT does not support {opcode:?} at ip {ip}"),
+            JitError::ConstantPoolOutOfBounds { ip, offset } => write!(
                     f,
                     "LoadConst at ip {ip} reads past constant pool at offset {offset}"
-                )
-            }
-            JitError::DynamicJumpTarget { ip, register } => {
-                write!(
-                    f,
-                    "jump at ip {ip} uses non-constant target register r{register}"
-                )
-            }
-            JitError::InvalidRegisterJump { ip, target } => {
-                write!(f, "jump at ip {ip} targets invalid instruction {target}")
-            }
+                ),
+            JitError::DynamicJumpTarget { ip, register } => write!(f, "jump at ip {ip} uses non-constant target register r{register}"),
+            JitError::InvalidRegisterJump { ip, target } => write!(f, "jump at ip {ip} targets invalid instruction {target}"),
             JitError::Cranelift(message) => write!(f, "Cranelift error: {message}"),
         }
     }
@@ -100,7 +89,7 @@ impl fmt::Display for JitError {
 
 impl std::error::Error for JitError {}
 
-/// JIT-компилятор на базе Cranelift для W16 байткода.
+/// # JIT-компилятор на базе Cranelift для W16 байткода.
 ///
 /// Компилятор создаёт нативную функцию, которая обновляет регистровый файл W16,
 /// выполняет проверки границ памяти и вызывает runtime-хелперы для операций,

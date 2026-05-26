@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-w16-ir = { path = "../../w16-ir" }
-w16-lib = { path = "../../w16-lib" }
+target-lexicon = "0.13.5"
+w16-ir = "0.1.0"
+w16-lib = "0.1.0"
+w16c = { path = "../../w16c" }

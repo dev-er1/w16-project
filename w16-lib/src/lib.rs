@@ -193,8 +193,9 @@ impl W16 {
             Err(e) => Err(e)
         }
     }
-
+    
     /// Принять готовый bytecode и запустить.
+    #[inline(always)]
     pub fn run_bytecode(&self, bytecode: &Bytecode) -> Result<RunResult, W16Error> {
         run_bytecode_with_options(bytecode, self.run)
     }

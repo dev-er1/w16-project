@@ -2,11 +2,11 @@ import os
 import sys
 
 # Список папок, которые по умолчанию стоит игнорировать, чтобы не спамить в консоль
-DEFAULT_IGNORE = {'target'}
+DEFAULT_IGNORE = {'target', '.git'}
 
 def print_tree(path, prefix='', ignore_dirs=DEFAULT_IGNORE):
     if not os.path.exists(path):
-        print(f"Ошибка: Путь '{path}' не существует.")
+        print(f"Путь '{path}' не существует.")
         return
 
     # Получаем список всех элементов в директории и сортируем их (папки сначала)

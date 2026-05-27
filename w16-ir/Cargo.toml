@@ -1,9 +1,10 @@
 [package]
 name = "w16-ir"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "Apache-2.0"
 description = "Промежуточное представление w16, и оптимизации"
+repository = "https://github.com/dev-er1/w16-project"
 
 [dependencies]
-w16-core = { version = "0.1.0", path = "../w16-core" }
+w16-core = { path = "../w16-core" }

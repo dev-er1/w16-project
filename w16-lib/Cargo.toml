@@ -8,8 +8,8 @@ readme = "W16-LIB.md"
 repository = "https://github.com/dev-er1/w16-project"
 
 [dependencies]
-w16-core = { version = "0.1.0", path = "../w16-core" }
-w16-ir = { version = "0.1.0", path = "../w16-ir" }
+w16-core = { path = "../w16-core" }
+w16-ir = { path ="../w16-ir" }
 
 [dev-dependencies]
 proptest = "1.11.0"

@@ -113,7 +113,7 @@ impl Executer {
             Some(out_path) => {
                 std::fs::write(&out_path, &text)
                     .map_err(|e| CLIError::new(CliErrorKind::Io(e.to_string())))?;
-                eprintln!("{BOLD}{GREEN}emitted{RESET} {GREY}→{RESET} {CYAN}{out_path}{RESET}");
+                eprintln!("{BOLD}{GREEN}emitted{RESET} {GREY}->{RESET} {CYAN}{out_path}{RESET}");
             }
             None => print!("{text}"),
         }

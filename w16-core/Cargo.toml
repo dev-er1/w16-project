@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0"
 description = "Ядро W16"
+repository = "https://github.com/dev-er1/w16-project"
 
 [dependencies]
 cranelift = "0.131.1"

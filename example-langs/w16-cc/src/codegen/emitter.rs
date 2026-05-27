@@ -278,9 +278,10 @@ fn return_type_str(rt: &ReturnType) -> String {
 fn lit_str(lit: &Literal) -> String {
     match lit {
         Literal::Int(v) => v.to_string(),
-        Literal::Float(v) => format!("{v:?}"),   // сохраняем точность
+        Literal::SignedInt(v) => v.to_string(),
+        Literal::Float(v) => format!("{v:?}"),   // Сохраняем точность
         Literal::Bool(b) => b.to_string(),
-        Literal::String(s) => format!("{s:?}"),   // экранируем
+        Literal::String(s) => format!("{s:?}"),   // Экранируем
     }
 }
 

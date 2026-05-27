@@ -4,7 +4,7 @@
 //!
 //! ## Два выхода
 //!
-//! - [`AstTranslator`] — строит `hir::Module` напрямую (AST → HIR AST).
+//! - [`AstTranslator`] — строит `hir::Module` напрямую (AST -> HIR AST).
 //!   Используется когда нужно запустить через `w16_lib::W16::run_hir_ast`.
 //!
 //! - [`TextEmitter`] — генерирует текстовый W16-HIR (`String`).
@@ -16,9 +16,9 @@
 //! - `goto`/метки не поддерживаются — HIR не имеет unstructured jumps.
 //! - `switch` раскрывается в цепочку `if/else`.
 //! - `do-while` транслируется напрямую в `hir::Stmt::DoWhile`.
-//! - Все целые типы C → `hir::Type::I64` или `U64` в зависимости от знака.
-//! - `float`/`double` → `hir::Type::F64`.
-//! - `char` → `hir::Type::U64` (байт).
+//! - Все целые типы C -> `hir::Type::I64` или `U64` в зависимости от знака.
+//! - `float`/`double` -> `hir::Type::F64`.
+//! - `char` -> `hir::Type::U64` (байт).
 
 pub mod translator;
 pub mod emitter;
@@ -51,14 +51,14 @@ impl std::fmt::Display for TranslationError {
 pub type TranslationResult<T> = Result<T, TranslationError>;
 
 // ---------------------------------------------------------------------------
-// Маппинг типов C → HIR
+// Маппинг типов C -> HIR
 // ---------------------------------------------------------------------------
 
 use crate::types::Type as CType;
 use w16_ir::hir::Type as HirType;
 
 /// Переводит тип C в тип HIR.
-/// Знаковые целые → `I64`, беззнаковые → `U64`, вещественные → `F64`.
+/// Знаковые целые -> `I64`, беззнаковые -> `U64`, вещественные -> `F64`.
 pub fn map_type(ty: &CType) -> HirType {
     match ty {
         CType::Void => HirType::Unit,

@@ -1,6 +1,6 @@
 // w16-cli\src\parser.rs
 //
-//! Парсер: поток токенов → валидированная [`Command`].
+//! Парсер: поток токенов -> валидированная [`Command`].
 //!
 //! Берёт плоский `Vec<Token>` от токенизатора и применяет семантические
 //! правила (обязательные аргументы, конфликты флагов и т.д.), возвращая
@@ -21,7 +21,7 @@ pub struct Parser;
 impl Parser {
     /// Разбирает поток токенов в [`Command`].
     pub fn parse(tokens: &[Token]) -> Result<Command, CLIError> {
-        // Нет токенов вообще → показываем справку.
+        // Нет токенов вообще -> показываем справку.
         let subcommand = match tokens.first() {
             Some(Token::SubCommand(s)) => s.as_str(),
             _ => return Ok(Command::new(CommandKind::Help)),

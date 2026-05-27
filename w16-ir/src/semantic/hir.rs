@@ -424,6 +424,7 @@ impl ScopeStack {
 fn literal_type(value: &Literal) -> Type {
     match value {
         Literal::Int(_) => Type::U64,
+        Literal::SignedInt(_) => Type::I64,
         Literal::Float(_) => Type::F64,
         Literal::Bool(_) => Type::Bool,
         Literal::String(_) => Type::Ptr,

@@ -22,7 +22,7 @@ to make it clear which part of the runtime is affected by the changes:
 feat(...):     ... — adding a new feature to some part of the project.
 fix(...):      ... — a fix.
 doc(...):      ... — adding or updating documentation.
-some(...):     ... — adding or changing some things in project(small changes).
+chore(...):     ... — adding or changing some things in project(small changes).
 refactor(...): ... — changing the logic or structure of the project.
 ```
 

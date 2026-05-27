@@ -346,7 +346,7 @@ fn test_binary_precedence() {
 
 #[test]
 fn test_binary_left_assoc() {
-    // `1 - 2 - 3` → `(1 - 2) - 3`: корень — Sub, lhs тоже Sub.
+    // `1 - 2 - 3` -> `(1 - 2) - 3`: корень — Sub, lhs тоже Sub.
     let expr = single_expr_stmt("void f() { 1 - 2 - 3; }");
     match expr.kind {
         ExprKind::Binary { op: BinaryOp::Sub, lhs, .. } => {
@@ -358,7 +358,7 @@ fn test_binary_left_assoc() {
 
 #[test]
 fn test_assign_right_assoc() {
-    // `a = b = 1` → `a = (b = 1)`: корень — Assign, rhs тоже Assign.
+    // `a = b = 1` -> `a = (b = 1)`: корень — Assign, rhs тоже Assign.
     let expr = single_expr_stmt("void f() { a = b = 1; }");
     match expr.kind {
         ExprKind::Binary { op: BinaryOp::Assign, rhs, .. } => {
@@ -486,7 +486,7 @@ fn test_comma_expr() {
 
 #[test]
 fn test_logical_and_or() {
-    // `a && b || c` → `(a && b) || c` — Or имеет меньший приоритет.
+    // `a && b || c` -> `(a && b) || c` — Or имеет меньший приоритет.
     let expr = single_expr_stmt("void f() { a && b || c; }");
     match expr.kind {
         ExprKind::Binary { op: BinaryOp::Or, lhs, .. } => {

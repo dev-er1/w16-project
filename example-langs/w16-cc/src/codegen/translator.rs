@@ -24,9 +24,9 @@ use super::{map_type, TranslationError, TranslationResult};
 // ---------------------------------------------------------------------------
 
 /// Локальная область видимости внутри функции.
-/// Отображает StringId → имя HIR-переменной (`String`).
+/// Отображает StringId -> имя HIR-переменной (`String`).
 struct FnCtx {
-    /// Стек скоупов: имя C-переменной (через StringPool) → имя HIR-локала.
+    /// Стек скоупов: имя C-переменной (через StringPool) -> имя HIR-локала.
     scopes: Vec<HashMap<u32, String>>,
     /// Счётчик для генерации уникальных имён (`_t0`, `_t1`, ...).
     temp_counter: usize,
@@ -230,7 +230,7 @@ impl<'a> AstTranslator<'a> {
                     }
                 }
 
-                // cond: если нет → `while true`
+                // cond: если нет -> `while true`
                 let hir_cond = if let Some(cond) = cond {
                     self.translate_expr_as_bool(cond, ctx, out)?
                 } else {
@@ -281,7 +281,7 @@ impl<'a> AstTranslator<'a> {
     }
 
     // -----------------------------------------------------------------------
-    // Switch → if/else if/else
+    // Switch -> if/else if/else
     // -----------------------------------------------------------------------
 
     fn translate_switch(
@@ -433,7 +433,7 @@ impl<'a> AstTranslator<'a> {
         let value = if let Some(init) = &v.initializer {
             self.translate_initializer(init, hir_ty, ctx, out)?
         } else {
-            // Нет инициализатора → 0
+            // Нет инициализатора -> 0
             default_value(hir_ty)
         };
 
@@ -532,7 +532,7 @@ impl<'a> AstTranslator<'a> {
             }
 
             ExprKind::Index { array, index } => {
-                // arr[i] → load.u64(arr + i * 8)  — упрощённо
+                // arr[i] -> load.u64(arr + i * 8)  — упрощённо
                 let arr = self.translate_expr(array, ctx, out)?;
                 let idx = self.translate_expr(index, ctx, out)?;
                 let scaled = HirExpr::Binary {
@@ -679,7 +679,7 @@ impl<'a> AstTranslator<'a> {
             )),
         };
 
-        // Составное присваивание: x += rhs → x = x + rhs
+        // Составное присваивание: x += rhs -> x = x + rhs
         let final_val = if *op == BinaryOp::Assign {
             rhs_val.clone()
         } else {
@@ -753,15 +753,19 @@ impl<'a> AstTranslator<'a> {
 fn translate_literal(v: &CValue) -> HirExpr {
     match v {
         CValue::Bool(b) => HirExpr::Literal(HirLit::Bool(*b)),
-        CValue::Int(i) => HirExpr::Literal(HirLit::Int(*i as u64)),
+
+        CValue::Int(i) => HirExpr::Literal(HirLit::SignedInt(*i as i64)),
+        CValue::Short(s) => HirExpr::Literal(HirLit::SignedInt(*s as i64)),
+        CValue::Long(l) => HirExpr::Literal(HirLit::SignedInt(*l)),
+        CValue::LongLong(l) => HirExpr::Literal(HirLit::SignedInt(*l)),
+
         CValue::UInt(u) => HirExpr::Literal(HirLit::Int(*u as u64)),
-        CValue::Short(s) => HirExpr::Literal(HirLit::Int(*s as u64)),
         CValue::UShort(u) => HirExpr::Literal(HirLit::Int(*u as u64)),
-        CValue::Long(l) => HirExpr::Literal(HirLit::Int(*l as u64)),
         CValue::ULong(u) => HirExpr::Literal(HirLit::Int(*u)),
-        CValue::LongLong(l) => HirExpr::Literal(HirLit::Int(*l as u64)),
         CValue::ULongLong(u) => HirExpr::Literal(HirLit::Int(*u)),
+
         CValue::Char(c) => HirExpr::Literal(HirLit::Int(*c as u64)),
+
         CValue::Float(f) => HirExpr::Literal(HirLit::Float(*f as f64)),
         CValue::Double(d) => HirExpr::Literal(HirLit::Float(*d)),
         _ => HirExpr::Literal(HirLit::Int(0)),
@@ -770,6 +774,7 @@ fn translate_literal(v: &CValue) -> HirExpr {
 
 fn default_value(ty: HirType) -> HirExpr {
     match ty {
+        HirType::I64 => HirExpr::Literal(HirLit::SignedInt(0)),
         HirType::F64 => HirExpr::Literal(HirLit::Float(0.0)),
         HirType::Bool => HirExpr::Literal(HirLit::Bool(false)),
         _ => HirExpr::Literal(HirLit::Int(0)),
@@ -801,6 +806,6 @@ fn compound_assign_op(op: &BinaryOp) -> HirBinOp {
         BinaryOp::XorAssign => HirBinOp::BitXor,
         BinaryOp::ShlAssign => HirBinOp::Shl,
         BinaryOp::ShrAssign => HirBinOp::Shr,
-        _       => unreachable!(),
+        _      => unreachable!(),
     }
 }

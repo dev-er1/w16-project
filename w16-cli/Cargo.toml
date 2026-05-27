@@ -6,5 +6,5 @@ license = "Apache-2.0"
 
 [dependencies]
 target-lexicon = "0.13.5"
-w16-lib = "0.1.1"
+w16-lib = { path = "../w16-lib" }
 w16c = { path = "../w16c" }

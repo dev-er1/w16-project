@@ -671,9 +671,9 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
             let cond_val = lower_expr(ctx, cond, constants);
             ctx.set_term(MIRTerminator::Br {
                 cond: cond_val,
-                then_blk: body_blk,  // истина → снова в тело
+                then_blk: body_blk,  // истина -> снова в тело
                 then_args: Vec::new(),
-                else_blk: exit_blk,  // ложь → выход
+                else_blk: exit_blk,  // ложь -> выход
                 else_args: Vec::new(),
             });
 
@@ -759,6 +759,7 @@ fn lower_expr(ctx: &mut Ctx, expr: &Expr, constants: &mut Vec<MIRConstant>) -> V
         Expr::Literal(lit) => {
             let (typ, mir_lit) = match lit {
                 Literal::Int(v) => (Type::U64, Literal::Int(*v)),
+                Literal::SignedInt(v) => (Type::I64, Literal::SignedInt(*v)),
                 Literal::Float(v) => (Type::F64, Literal::Float(*v)),
                 Literal::Bool(v) => (Type::Bool, Literal::Bool(*v)),
                 Literal::String(s) => (Type::Ptr, Literal::String(s.clone())),

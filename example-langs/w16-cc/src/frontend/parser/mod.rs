@@ -190,7 +190,7 @@ impl Parser {
     fn parse_param_list(&mut self) -> ParseResult<Vec<Param>> {
         let mut params = Vec::new();
 
-        // `void` как единственный параметр → пустой список.
+        // `void` как единственный параметр -> пустой список.
         if matches!(self.peek_kind(), TokenKind::Typ(Type::Void))
             && self.peek_kind_at(1) == &TokenKind::RightParen
         {

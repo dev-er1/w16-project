@@ -220,10 +220,15 @@ pub enum Expr {
 pub enum Literal {
     /// Integer literal. До уточнения типа считается `u64`.
     Int(u64),
+
+    SignedInt(i64),
+    
     /// Floating-point literal.
     Float(f64),
+
     /// Boolean literal.
     Bool(bool),
+
     /// String literal. В HIR типизируется как `ptr`.
     String(String),
 }

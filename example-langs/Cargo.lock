@@ -356,9 +356,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.8.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
+checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
 
 [[package]]
 name = "object"
@@ -494,7 +494,7 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "w16-cc"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "target-lexicon",
  "w16-ir",
@@ -505,8 +505,6 @@ dependencies = [
 [[package]]
 name = "w16-core"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4d88f60c857b543717972ab1b9f99a243c0977f0ea30d5df970d689c03caaa7"
 dependencies = [
  "cranelift",
  "cranelift-jit",
@@ -516,18 +514,14 @@ dependencies = [
 
 [[package]]
 name = "w16-ir"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0385d5eaaf8ee53e7a6ec1ffa7dd3c3db18816b7fbe3055cf88b9443c6c1610d"
+version = "0.1.1"
 dependencies = [
  "w16-core",
 ]
 
 [[package]]
 name = "w16-lib"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f841bf380088d23ddece8a7c3f66ff7627eda4181827d5f47e4939809a8744e"
+version = "0.1.1"
 dependencies = [
  "w16-core",
  "w16-ir",

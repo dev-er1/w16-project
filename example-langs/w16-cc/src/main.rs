@@ -19,7 +19,7 @@ use cli::{
 };
 
 fn main() {
-    let tokens  = Tokenizer::tokenize();
+    let tokens = Tokenizer::tokenize();
     let command = Parser::parse(&tokens).unwrap_or_else(|e| {
         e.report();
         std::process::exit(1);

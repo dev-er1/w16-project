@@ -5,7 +5,7 @@ edition = "2024"
 license = "Apache-2.0"
 
 [dependencies]
-w16-core = "0.1.0"
+w16-core = {  path = "../w16-core" }
 
 cranelift-codegen = "0.131.1"
 cranelift-frontend = "0.131.1"

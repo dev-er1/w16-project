@@ -219,6 +219,9 @@ impl<'m> Ctx<'m> {
             Literal::Int(v) => {
                 self.pool.data.extend_from_slice(&v.to_le_bytes());
             }
+            Literal::SignedInt(v) => {
+                self.pool.data.extend_from_slice(&v.to_le_bytes());
+            }
             Literal::Float(v) => {
                 self.pool.data.extend_from_slice(&v.to_bits().to_le_bytes());
             }

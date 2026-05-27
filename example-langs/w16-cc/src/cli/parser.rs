@@ -20,7 +20,7 @@ impl Parser {
             "run" => parse_run(tokens),
             "emit-hir" => parse_emit_hir(tokens),
             "check" => parse_check(tokens),
-            "version" | "--version" | "-V" => Ok(Command::new(CommandKind::Version)),
+            "version" | "--version" | "-v" => Ok(Command::new(CommandKind::Version)),
             "help"    | "--help"    | "-h" => Ok(Command::new(CommandKind::Help)),
             unknown => Err(err_unknown_command(unknown)),
         }

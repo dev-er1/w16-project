@@ -80,7 +80,7 @@ flowchart TD
 * [MIR Specification and Source Code](w16-ir/src/mir.rs)
 
 
-* **Bytecode** — A final, compact register-based bytecode with a fixed structure (one opcode and three operands). This is the final transformation milestone before the code is passed to the virtual machine or the Cranelift JIT emitter.
+* **Bytecode** — A final, compact register-based bytecode with a fixed structure (one opcode, one register, and 2 operands). This is the final transformation milestone before the code is passed to the virtual machine or the Cranelift JIT emitter.
 * [Bytecode Instruction Structure](w16-core/src/bytecode.rs)
 
 ---

@@ -26,17 +26,17 @@ impl <'a>W16C<'a> {
                 for error in e {
                     error.report_error(self.src);
                 }
-                panic!("Код не может быть запущен из-за ошибок компиляции.");
+                panic!("\x1b[1;31mSome error\x1b[0m.");
             }
         };
 
         let mut w16_translator = codegen::AstTranslator::new(&c_frontend.string_table);
 
-        let w16_hir = match w16_translator.translate(ast, "динахер со своим модулем") {
+        let w16_hir = match w16_translator.translate(ast, "main") {
             Ok(module) => module,
             Err(fucking_err) => {
                 println!("{fucking_err:?}");
-                panic!("Код не может быть запущен из-за ошибок компиляции.");
+                panic!("\x1b[1;31mSome error\x1b[0m.");
             }
         };
 
@@ -44,7 +44,7 @@ impl <'a>W16C<'a> {
             Ok(win) => win,
             Err(e) => {
                 println!("{e}");
-                panic!("Код не может быть запущен из-за ошибок компиляции.");
+                panic!("\x1b[1;31mSome error\x1b[0m.");
             }
         };
 

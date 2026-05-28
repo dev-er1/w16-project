@@ -117,7 +117,7 @@ pub enum OptLevel {
     /// Максимальные оптимизации.
     SpeedAndSize,
 }
- 
+
 impl OptLevel {
     fn as_str(self) -> &'static str {
         match self {
@@ -173,12 +173,9 @@ impl AOT {
             .unwrap();
 
         // Создаем билдер для объектного файла
-        let builder = ObjectBuilder::new(
-            isa,
-            module_name,
-            cranelift_module::default_libcall_names(),
-        )
-        .unwrap();
+        let builder =
+            ObjectBuilder::new(isa, module_name, cranelift_module::default_libcall_names())
+                .unwrap();
 
         let module = ObjectModule::new(builder);
 

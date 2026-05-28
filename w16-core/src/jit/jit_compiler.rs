@@ -75,13 +75,20 @@ pub enum JitError {
 impl fmt::Display for JitError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            JitError::UnsupportedOpcode { ip, opcode } => write!(f, "JIT does not support {opcode:?} at ip {ip}"),
+            JitError::UnsupportedOpcode { ip, opcode } => {
+                write!(f, "JIT does not support {opcode:?} at ip {ip}")
+            }
             JitError::ConstantPoolOutOfBounds { ip, offset } => write!(
-                    f,
-                    "LoadConst at ip {ip} reads past constant pool at offset {offset}"
-                ),
-            JitError::DynamicJumpTarget { ip, register } => write!(f, "jump at ip {ip} uses non-constant target register r{register}"),
-            JitError::InvalidRegisterJump { ip, target } => write!(f, "jump at ip {ip} targets invalid instruction {target}"),
+                f,
+                "LoadConst at ip {ip} reads past constant pool at offset {offset}"
+            ),
+            JitError::DynamicJumpTarget { ip, register } => write!(
+                f,
+                "jump at ip {ip} uses non-constant target register r{register}"
+            ),
+            JitError::InvalidRegisterJump { ip, target } => {
+                write!(f, "jump at ip {ip} targets invalid instruction {target}")
+            }
             JitError::Cranelift(message) => write!(f, "Cranelift error: {message}"),
         }
     }

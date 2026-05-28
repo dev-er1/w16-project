@@ -91,10 +91,11 @@ impl Tokenizer {
                 tokens.push(Token::LongFlag(arg.clone()));
 
                 // Смотрим на следующий аргумент: если он не флаг — это значение текущего флага.
-                if let Some(next) = args.get(i + 1) && !next.starts_with('-') {
-                        tokens.push(Token::FlagValue(next.clone()));
-                        iter.next(); // потребляем токен значения
-                    
+                if let Some(next) = args.get(i + 1)
+                    && !next.starts_with('-')
+                {
+                    tokens.push(Token::FlagValue(next.clone()));
+                    iter.next(); // потребляем токен значения
                 }
             } else if arg.starts_with('-') {
                 // Короткий флаг: `-i`, `-j` и т.д.
@@ -141,7 +142,11 @@ mod tests {
     fn test_long_flag_with_value() {
         let tokens = tok(&["run", "main.w16h", "--out", "result"]);
         assert!(tokens.iter().any(|t| *t == Token::LongFlag("--out".into())));
-        assert!(tokens.iter().any(|t| *t == Token::FlagValue("result".into())));
+        assert!(
+            tokens
+                .iter()
+                .any(|t| *t == Token::FlagValue("result".into()))
+        );
     }
 
     #[test]

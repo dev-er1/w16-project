@@ -34,7 +34,11 @@ pub fn compile_to_executable_with_opts(
 
     let obj_file = with_extension(
         output_path,
-        if cfg!(target_os = "windows") { "obj" } else { "o" },
+        if cfg!(target_os = "windows") {
+            "obj"
+        } else {
+            "o"
+        },
     );
     let exe_file = if cfg!(target_os = "windows") {
         with_extension(output_path, "exe")
@@ -88,13 +92,9 @@ fn build_linker_command(
     }
 }
 
-fn build_msvc_linker(
-    obj_file: &str,
-    exe_file: &str,
-    target: &Triple,
-) -> Result<Command, AOTError> {
-    let user_profile = std::env::var("USERPROFILE")
-        .unwrap_or_else(|_| r"C:\Users\default".to_string());
+fn build_msvc_linker(obj_file: &str, exe_file: &str, target: &Triple) -> Result<Command, AOTError> {
+    let user_profile =
+        std::env::var("USERPROFILE").unwrap_or_else(|_| r"C:\Users\default".to_string());
     let runtime_lib = format!(r"{user_profile}\w16\static-lib\w16-fns.lib");
     let out_arg = format!("/OUT:{exe_file}");
 
@@ -109,9 +109,7 @@ fn build_msvc_linker(
     ];
 
     // Предпочитаем MSVC link.exe найденный через cc крейт.
-    if let Some(tool) =
-        cc::windows_registry::find_tool(target.to_string().as_str(), "link.exe")
-    {
+    if let Some(tool) = cc::windows_registry::find_tool(target.to_string().as_str(), "link.exe") {
         let mut cmd = tool.to_command();
         cmd.args(common_args);
         Ok(cmd)

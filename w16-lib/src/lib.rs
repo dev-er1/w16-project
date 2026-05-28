@@ -17,7 +17,6 @@ pub use w16_ir::{
     mir,
 };
 
-
 /// Доступные стабильные способы запуска W16 bytecode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ExecutionMode {
@@ -125,13 +124,11 @@ impl From<VMError> for W16Error {
 }
 
 /// Удобный builder для повторного использования настроек.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct W16 {
     compile: CompileOptions,
     run: RunOptions,
 }
-
 
 impl W16 {
     /// Создать фасад с настройками по умолчанию.
@@ -190,10 +187,10 @@ impl W16 {
     pub fn hir_to_bytecode(&self, module: &str) -> Result<Bytecode, W16Error> {
         match compile_hir_text_with_options(module, self.compile) {
             Ok(bc) => Ok(bc),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
     }
-    
+
     /// Принять готовый bytecode и запустить.
     #[inline(always)]
     pub fn run_bytecode(&self, bytecode: &Bytecode) -> Result<RunResult, W16Error> {
@@ -203,26 +200,26 @@ impl W16 {
     /// Вывести все этапы компиляции
     pub fn debug_full_pipeline(source: &str) -> Result<String, W16Error> {
         let mut output = String::new();
-        
+
         // Tokens
         output.push_str(&debug_hir_tokens(source)?);
         output.push('\n');
-        
+
         // HIR AST
         output.push_str(&debug_hir_ast(source)?);
         output.push('\n');
-        
+
         // MIR AST (без оптимизаций)
         output.push_str(&debug_mir_ast(source)?);
         output.push('\n');
-        
+
         // MIR AST (с оптимизациями)
         output.push_str(&debug_mir_ast_optimized(source)?);
         output.push('\n');
-        
+
         // Bytecode
         output.push_str(&debug_bytecode(source)?);
-        
+
         Ok(output)
     }
 }
@@ -435,7 +432,10 @@ pub fn debug_bytecode(source: &str) -> Result<String, W16Error> {
     for (idx, inst) in bytecode.instructions.iter().enumerate() {
         output.push_str(&format!("[{idx}] {inst:?}\n"));
     }
-    output.push_str(&format!("\nConstant Pool: {} bytes\n", bytecode.constant_pool.data.len()));
+    output.push_str(&format!(
+        "\nConstant Pool: {} bytes\n",
+        bytecode.constant_pool.data.len()
+    ));
     Ok(output)
 }
 // ====================================================================================

@@ -9,14 +9,8 @@
 use std::time::Instant;
 
 use w16_lib::{
-    ExecutionMode,
-    run_hir_text_as,
-    debug_hir_tokens,
-    debug_hir_ast,
-    debug_mir_ast,
-    debug_mir_ast_optimized,
-    debug_bytecode,
-    W16,
+    ExecutionMode, W16, debug_bytecode, debug_hir_ast, debug_hir_tokens, debug_mir_ast,
+    debug_mir_ast_optimized, run_hir_text_as,
 };
 
 use crate::cmd::{Command, CommandKind, DbgStage, RunMode};
@@ -32,7 +26,10 @@ impl Executer {
             CommandKind::Build => Self::build(cmd),
             CommandKind::Dbg(stage) => Self::dbg(stage, cmd),
             CommandKind::Version => Self::version(),
-            CommandKind::Help => { help::print(); Ok(()) }
+            CommandKind::Help => {
+                help::print();
+                Ok(())
+            }
         }
     }
 
@@ -58,7 +55,10 @@ impl Executer {
             .map_err(|e| CLIError::new(CliErrorKind::Runtime(e.to_string())))?;
 
         if let Some(t) = start {
-            eprintln!("\x1b[1;32mFinished\x1b[0m in \x1b[1m{:.4?}\x1b[0m", t.elapsed());
+            eprintln!(
+                "\x1b[1;32mFinished\x1b[0m in \x1b[1m{:.4?}\x1b[0m",
+                t.elapsed()
+            );
         }
 
         Ok(())
@@ -78,7 +78,8 @@ impl Executer {
 
         let w16 = W16::new();
 
-        let bc = w16.hir_to_bytecode(&source)
+        let bc = w16
+            .hir_to_bytecode(&source)
             .map_err(|e| CLIError::new(CliErrorKind::Runtime(e.to_string())))?;
 
         // --- Отрезаем расширение ---
@@ -134,6 +135,5 @@ impl Executer {
 
 /// Читает файл в строку, заворачивая ошибку I/O в `CLIError`.
 fn read_file(path: &str) -> Result<String, CLIError> {
-    std::fs::read_to_string(path)
-        .map_err(|e| CLIError::new(CliErrorKind::Runtime(e.to_string())))
+    std::fs::read_to_string(path).map_err(|e| CLIError::new(CliErrorKind::Runtime(e.to_string())))
 }

@@ -11,8 +11,7 @@
 
 use crate::cmd::{Command, CommandFlags, CommandKind, DbgStage, RunMode};
 use crate::error::{
-    CLIError, err_conflicting_flags, err_missing_arg,
-    err_unknown_command, err_unknown_stage,
+    CLIError, err_conflicting_flags, err_missing_arg, err_unknown_command, err_unknown_stage,
 };
 use crate::tokenizer::Token;
 
@@ -32,7 +31,7 @@ impl Parser {
             "build" => parse_build(tokens),
             "dbg" => parse_dbg(tokens),
             "version" | "--version" | "-V" => Ok(Command::new(CommandKind::Version)),
-            "help"    | "--help"    | "-h" => Ok(Command::new(CommandKind::Help)),
+            "help" | "--help" | "-h" => Ok(Command::new(CommandKind::Help)),
             unknown => Err(err_unknown_command(unknown)),
         }
     }
@@ -43,8 +42,7 @@ impl Parser {
 // ---------------------------------------------------------------------------
 
 fn parse_run(tokens: &[Token]) -> Result<Command, CLIError> {
-    let file = extract_positional(tokens, 0)
-        .ok_or_else(|| err_missing_arg("run", "file.w16h"))?;
+    let file = extract_positional(tokens, 0).ok_or_else(|| err_missing_arg("run", "file.w16h"))?;
 
     let wants_interp = has_short(tokens, "-i");
     let wants_jit = has_short(tokens, "-j");
@@ -53,31 +51,35 @@ fn parse_run(tokens: &[Token]) -> Result<Command, CLIError> {
         return Err(err_conflicting_flags("-i", "-j"));
     }
 
-    let run_mode = if wants_jit { RunMode::Jit } else { RunMode::Interpreter };
+    let run_mode = if wants_jit {
+        RunMode::Jit
+    } else {
+        RunMode::Interpreter
+    };
     let show_time = has_long(tokens, "--time");
 
     Ok(Command::new(CommandKind::Run)
         .with_file(file)
-        .with_flags(CommandFlags { run_mode, show_time }))
+        .with_flags(CommandFlags {
+            run_mode,
+            show_time,
+        }))
 }
 
 fn parse_build(tokens: &[Token]) -> Result<Command, CLIError> {
-    let file = extract_positional(tokens, 0)
-        .ok_or_else(|| err_missing_arg("build", "file.w16h"))?;
+    let file =
+        extract_positional(tokens, 0).ok_or_else(|| err_missing_arg("build", "file.w16h"))?;
 
     Ok(Command::new(CommandKind::Build).with_file(file))
 }
 
 fn parse_dbg(tokens: &[Token]) -> Result<Command, CLIError> {
     // Ожидаем: dbg <stage> <file.w16h>
-    let stage_str = extract_positional(tokens, 0)
-        .ok_or_else(|| err_missing_arg("dbg", "stage"))?;
+    let stage_str = extract_positional(tokens, 0).ok_or_else(|| err_missing_arg("dbg", "stage"))?;
 
-    let stage = parse_stage(&stage_str)
-        .ok_or_else(|| err_unknown_stage(&stage_str))?;
+    let stage = parse_stage(&stage_str).ok_or_else(|| err_unknown_stage(&stage_str))?;
 
-    let file = extract_positional(tokens, 1)
-        .ok_or_else(|| err_missing_arg("dbg", "file.w16h"))?;
+    let file = extract_positional(tokens, 1).ok_or_else(|| err_missing_arg("dbg", "file.w16h"))?;
 
     Ok(Command::new(CommandKind::Dbg(stage)).with_file(file))
 }
@@ -104,7 +106,8 @@ fn parse_stage(s: &str) -> Option<DbgStage> {
 
 /// Возвращает n-й позиционный аргумент (0-индекс, субкоманда не считается).
 fn extract_positional(tokens: &[Token], n: usize) -> Option<String> {
-    tokens.iter()
+    tokens
+        .iter()
         .filter(|t| matches!(t, Token::Positional(_)))
         .nth(n)
         .map(|t| t.as_str().to_owned())
@@ -112,19 +115,25 @@ fn extract_positional(tokens: &[Token], n: usize) -> Option<String> {
 
 /// Проверяет наличие короткого флага в потоке токенов.
 fn has_short(tokens: &[Token], flag: &str) -> bool {
-    tokens.iter().any(|t| matches!(t, Token::ShortFlag(s) if s == flag))
+    tokens
+        .iter()
+        .any(|t| matches!(t, Token::ShortFlag(s) if s == flag))
 }
 
 /// Проверяет наличие длинного флага в потоке токенов.
 fn has_long(tokens: &[Token], flag: &str) -> bool {
-    tokens.iter().any(|t| matches!(t, Token::LongFlag(s) if s == flag))
+    tokens
+        .iter()
+        .any(|t| matches!(t, Token::LongFlag(s) if s == flag))
 }
 
 /// Возвращает значение длинного Key-Value флага, если он присутствует.
 #[allow(dead_code)]
 fn long_flag_value<'a>(tokens: &'a [Token], flag: &str) -> Option<&'a str> {
     let mut iter = tokens.iter().peekable();
-    while let Some(tok) = iter.next() && matches!(tok, Token::LongFlag(s) if s == flag) {
+    while let Some(tok) = iter.next()
+        && matches!(tok, Token::LongFlag(s) if s == flag)
+    {
         if let Some(Token::FlagValue(val)) = iter.peek() {
             return Some(val.as_str());
         }
@@ -165,7 +174,10 @@ mod tests {
     #[test]
     fn test_run_missing_file() {
         let err = parse_args(&["run"]).unwrap_err();
-        assert!(matches!(err.kind, crate::error::CliErrorKind::MissingArgument { .. }));
+        assert!(matches!(
+            err.kind,
+            crate::error::CliErrorKind::MissingArgument { .. }
+        ));
     }
 
     #[test]
@@ -189,7 +201,10 @@ mod tests {
             Token::ShortFlag("-j".into()),
         ];
         let err = Parser::parse(&tokens).unwrap_err();
-        assert!(matches!(err.kind, crate::error::CliErrorKind::ConflictingFlags(..)));
+        assert!(matches!(
+            err.kind,
+            crate::error::CliErrorKind::ConflictingFlags(..)
+        ));
     }
 
     #[test]
@@ -211,12 +226,17 @@ mod tests {
             Token::Positional("main.w16h".into()),
         ];
         let err = Parser::parse(&tokens).unwrap_err();
-        assert!(matches!(err.kind, crate::error::CliErrorKind::UnknownStage(..)));
+        assert!(matches!(
+            err.kind,
+            crate::error::CliErrorKind::UnknownStage(..)
+        ));
     }
 
     #[test]
     fn test_unknown_command() {
         let err = parse_args(&["fly"]).unwrap_err();
-        assert!(matches!(err.kind, crate::error::CliErrorKind::UnknownCommand(ref s) if s == "fly"));
+        assert!(
+            matches!(err.kind, crate::error::CliErrorKind::UnknownCommand(ref s) if s == "fly")
+        );
     }
 }

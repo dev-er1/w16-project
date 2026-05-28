@@ -264,7 +264,7 @@ fn try_extract_linear_iv(func: &MIRFunction, lp: &Loop, phi_id: ValueId) -> Opti
     // try_extract_linear_iv is only used internally without module access;
     // the real entry point is analyze_loop_ivs_full which calls extract_add_step with module.
     let _ = (func, lp, rec, phi_id);
-    None// disabled: use analyze_loop_ivs_full instead
+    None // disabled: use analyze_loop_ivs_full instead
 }
 
 /// Извлекает аргумент под индексом `arg_idx` из terminator-а `pred`
@@ -377,16 +377,17 @@ fn find_exit_condition(
 
     // lhs должен быть IV, rhs — константа (или наоборот)
     if let Some(iv) = linear_ivs.get(&lhs)
-        && let IVKind::Linear { .. } = &iv.kind {
-            // rhs должна быть константой — пока заглушка
-            // (реальное значение нужно из module.constants)
-            let _ = rhs;
-            return Some(ExitCondition {
-                iv_phi: lhs,
-                op,
-                bound: 0,
-            }); // bound заполнится ниже
-        }
+        && let IVKind::Linear { .. } = &iv.kind
+    {
+        // rhs должна быть константой — пока заглушка
+        // (реальное значение нужно из module.constants)
+        let _ = rhs;
+        return Some(ExitCondition {
+            iv_phi: lhs,
+            op,
+            bound: 0,
+        }); // bound заполнится ниже
+    }
     None
 }
 
@@ -421,11 +422,11 @@ fn find_sum_ivs(func: &MIRFunction, lp: &Loop, ivs: &mut HashMap<ValueId, Induct
                 if pred != lp.back_edge.tail
                     && let Some(arg) =
                         get_jmp_arg(&func.blocks[pred].terminator, lp.header, phi_idx)
-                    {
-                        // Пока заглушка — реальное значение берётся из module
-                        let _ = arg;
-                        found = Some(0i64);
-                    }
+                {
+                    // Пока заглушка — реальное значение берётся из module
+                    let _ = arg;
+                    found = Some(0i64);
+                }
             }
             match found {
                 Some(v) => v,
@@ -459,19 +460,19 @@ fn find_sum_ivs(func: &MIRFunction, lp: &Loop, ivs: &mut HashMap<ValueId, Induct
                 base: base_iv,
                 step: step_iv,
             } = linear_iv.kind
-            {
-                ivs.insert(
+        {
+            ivs.insert(
+                phi_id,
+                InductionVar {
                     phi_id,
-                    InductionVar {
-                        phi_id,
-                        kind: IVKind::SumOfLinear {
-                            base_sum,
-                            base_iv,
-                            step_iv,
-                        },
+                    kind: IVKind::SumOfLinear {
+                        base_sum,
+                        base_iv,
+                        step_iv,
                     },
-                );
-            }
+                },
+            );
+        }
     }
 }
 
@@ -675,9 +676,10 @@ fn find_sum_ivs_with_module(
         let mut base_sum: Option<i64> = None;
         for &pred in &header.predecessors {
             if pred != lp.back_edge.tail
-                && let Some(arg) = get_jmp_arg(&func.blocks[pred].terminator, lp.header, phi_idx) {
-                    base_sum = extract_const_from_module(func, module, arg);
-                }
+                && let Some(arg) = get_jmp_arg(&func.blocks[pred].terminator, lp.header, phi_idx)
+            {
+                base_sum = extract_const_from_module(func, module, arg);
+            }
         }
         let base_sum = match base_sum {
             Some(v) => v,
@@ -708,19 +710,19 @@ fn find_sum_ivs_with_module(
                 base: base_iv,
                 step: step_iv,
             } = linear_iv.kind
-            {
-                ivs.insert(
+        {
+            ivs.insert(
+                phi_id,
+                InductionVar {
                     phi_id,
-                    InductionVar {
-                        phi_id,
-                        kind: IVKind::SumOfLinear {
-                            base_sum,
-                            base_iv,
-                            step_iv,
-                        },
+                    kind: IVKind::SumOfLinear {
+                        base_sum,
+                        base_iv,
+                        step_iv,
                     },
-                );
-            }
+                },
+            );
+        }
     }
 }
 

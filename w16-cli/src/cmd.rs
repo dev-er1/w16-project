@@ -4,11 +4,11 @@
 //!
 //! Всё что нужно знать остальным модулям CLI о разобранной команде — здесь.
 //! Никакой логики разбора аргументов, никакого I/O — только данные.
- 
+
 // ---------------------------------------------------------------------------
 // Реестр команд
 // ---------------------------------------------------------------------------
- 
+
 /// Одна запись в глобальном реестре команд.
 pub struct CommandUsage {
     pub name: &'static str,
@@ -18,13 +18,13 @@ pub struct CommandUsage {
     pub usage: &'static str,
     pub flags: &'static [FlagUsage],
 }
- 
+
 /// Один флаг, привязанный к команде.
 pub struct FlagUsage {
     pub flag: &'static str,
     pub description: &'static str,
 }
- 
+
 /// # Глобальный реестр всех команд CLI.
 ///
 /// `help` итерирует этот срез — ничего не захардкожено в тексте.
@@ -35,9 +35,18 @@ pub const COMMANDS: &[CommandUsage] = &[
         description: "Run a file",
         usage: "w16 run <file> [-i | -j] [--time]",
         flags: &[
-            FlagUsage { flag: "-i", description: "Interpreter / VM mode (default)" },
-            FlagUsage { flag: "-j", description: "JIT-compilation mode" },
-            FlagUsage { flag: "--time", description: "Print execution time after run"  },
+            FlagUsage {
+                flag: "-i",
+                description: "Interpreter / VM mode (default)",
+            },
+            FlagUsage {
+                flag: "-j",
+                description: "JIT-compilation mode",
+            },
+            FlagUsage {
+                flag: "--time",
+                description: "Print execution time after run",
+            },
         ],
     },
     CommandUsage {
@@ -53,12 +62,30 @@ pub const COMMANDS: &[CommandUsage] = &[
         description: "Dump an internal compilation stage",
         usage: "w16 dbg <stage> <file>",
         flags: &[
-            FlagUsage { flag: "tokens", description: "HIR token stream" },
-            FlagUsage { flag: "hir", description: "HIR AST" },
-            FlagUsage { flag: "mir",  description: "MIR AST (before optimizer)" },
-            FlagUsage { flag: "mir-opt", description: "MIR AST (after optimizer)" },
-            FlagUsage { flag: "bytecode",description: "Compiled bytecode instructions"},
-            FlagUsage { flag: "full", description: "All stages combined" },
+            FlagUsage {
+                flag: "tokens",
+                description: "HIR token stream",
+            },
+            FlagUsage {
+                flag: "hir",
+                description: "HIR AST",
+            },
+            FlagUsage {
+                flag: "mir",
+                description: "MIR AST (before optimizer)",
+            },
+            FlagUsage {
+                flag: "mir-opt",
+                description: "MIR AST (after optimizer)",
+            },
+            FlagUsage {
+                flag: "bytecode",
+                description: "Compiled bytecode instructions",
+            },
+            FlagUsage {
+                flag: "full",
+                description: "All stages combined",
+            },
         ],
     },
     CommandUsage {
@@ -76,11 +103,11 @@ pub const COMMANDS: &[CommandUsage] = &[
         flags: &[],
     },
 ];
- 
+
 // ---------------------------------------------------------------------------
 // Модель команды
 // ---------------------------------------------------------------------------
- 
+
 /// Режим выполнения для команды `run`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum RunMode {
@@ -90,7 +117,7 @@ pub enum RunMode {
     /// JIT-компиляция.
     Jit,
 }
- 
+
 /// Стадия дебага для команды `dbg`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DbgStage {
@@ -107,7 +134,7 @@ pub enum DbgStage {
     /// Все стадии подряд.
     Full,
 }
- 
+
 /// Опциональные флаги команды, которые не помещаются в `CommandKind`.
 #[derive(Debug, Clone, Default)]
 pub struct CommandFlags {
@@ -115,7 +142,7 @@ pub struct CommandFlags {
     /// Вывести время выполнения после запуска.
     pub show_time: bool,
 }
- 
+
 /// Дискриминант — что пользователь хочет сделать.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandKind {
@@ -124,7 +151,7 @@ pub enum CommandKind {
     /// Дамп внутренней стадии компиляции.
     Dbg(DbgStage),
     Version,
-    Help
+    Help,
 }
 
 /// Полностью разобранная и валидированная команда, готовая к исполнению.
@@ -145,7 +172,11 @@ pub struct Command {
 
 impl Command {
     pub fn new(kind: CommandKind) -> Self {
-        Self { kind, file: None, flags: CommandFlags::default() }
+        Self {
+            kind,
+            file: None,
+            flags: CommandFlags::default(),
+        }
     }
 
     pub fn with_file(mut self, file: impl Into<String>) -> Self {

@@ -137,9 +137,9 @@ fn constant_folding(module: &mut MIRModule, func_id: FunctionId) -> usize {
                         .values
                         .iter()
                         .position(|v| v.def == crate::mir::ValueDef::Inst(block.id, inst_idx))
-                    {
-                        cv.push((val_id, *cid));
-                    }
+                {
+                    cv.push((val_id, *cid));
+                }
             }
         }
         cv
@@ -429,22 +429,23 @@ fn dead_code_elimination(module: &mut MIRModule, func_id: FunctionId) -> usize {
         // Освобождаем uses операндов: они могут стать мёртвыми тоже
         let def = func.values[val_id].def.clone();
         if let crate::mir::ValueDef::Inst(block_id, inst_idx) = def
-            && let Some(inst) = func.blocks[block_id].instructions.get(inst_idx).cloned() {
-                let operands = inst_operands_for_dce(&inst);
-                for operand in operands {
-                    if operand < func.values.len() {
-                        // Убираем val_id из use-list операнда
-                        func.values[operand].uses.retain(|&u| u != val_id);
-                        // Если операнд теперь без uses — добавляем в worklist
-                        if func.values[operand].uses.is_empty()
-                            && !func.values[operand].is_dead
-                            && !terminator_used.contains(&operand)
-                        {
-                            worklist.push_back(operand);
-                        }
+            && let Some(inst) = func.blocks[block_id].instructions.get(inst_idx).cloned()
+        {
+            let operands = inst_operands_for_dce(&inst);
+            for operand in operands {
+                if operand < func.values.len() {
+                    // Убираем val_id из use-list операнда
+                    func.values[operand].uses.retain(|&u| u != val_id);
+                    // Если операнд теперь без uses — добавляем в worklist
+                    if func.values[operand].uses.is_empty()
+                        && !func.values[operand].is_dead
+                        && !terminator_used.contains(&operand)
+                    {
+                        worklist.push_back(operand);
                     }
                 }
             }
+        }
     }
 
     changes

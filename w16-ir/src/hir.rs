@@ -125,7 +125,7 @@ pub enum Stmt {
     DoWhile {
         /// Тело цикла — выполняется до первой проверки условия.
         body: Vec<Stmt>,
-        
+
         /// Условие, обязано иметь тип `bool`.
         cond: Expr,
     },
@@ -222,7 +222,7 @@ pub enum Literal {
     Int(u64),
 
     SignedInt(i64),
-    
+
     /// Floating-point literal.
     Float(f64),
 

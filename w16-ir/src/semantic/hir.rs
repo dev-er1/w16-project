@@ -62,7 +62,7 @@ impl<'a> HirVerifier<'a> {
             constants: HashMap::new(),
             functions: HashMap::new(),
             errors: Vec::new(),
-            loop_depth: 0
+            loop_depth: 0,
         }
     }
 
@@ -177,7 +177,7 @@ impl<'a> HirVerifier<'a> {
                 self.loop_depth -= 1;
                 scopes.pop();
             }
-            
+
             Stmt::DoWhile { body, cond } => {
                 scopes.push();
                 self.loop_depth += 1;
@@ -206,7 +206,8 @@ impl<'a> HirVerifier<'a> {
                 let expected = return_types(return_ty);
                 if actual != expected {
                     self.error(format!(
-                        "return type mismatch: expected {expected:?}, got {actual:?}"));
+                        "return type mismatch: expected {expected:?}, got {actual:?}"
+                    ));
                 }
             }
             Stmt::Halt => {}
@@ -291,14 +292,19 @@ impl<'a> HirVerifier<'a> {
                     {
                         Some(lhs_ty)
                     }
-                    BinaryOp::BitAnd | BinaryOp::Shl | BinaryOp::Shr | BinaryOp::BitOr | BinaryOp::BitXor
+                    BinaryOp::BitAnd
+                    | BinaryOp::Shl
+                    | BinaryOp::Shr
+                    | BinaryOp::BitOr
+                    | BinaryOp::BitXor
                         if is_integer(lhs_ty) || lhs_ty == Type::Bool =>
                     {
                         Some(lhs_ty)
                     }
                     BinaryOp::Eq | BinaryOp::Ne if lhs_ty != Type::Unit => Some(Type::Bool),
                     BinaryOp::Lt | BinaryOp::Le | BinaryOp::Gt | BinaryOp::Ge
-                        if is_numeric(lhs_ty) => {
+                        if is_numeric(lhs_ty) =>
+                    {
                         Some(Type::Bool)
                     }
                     _ => {

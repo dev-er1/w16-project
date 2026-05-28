@@ -68,7 +68,7 @@ impl<'f> Ctx<'f> {
             terminated: Vec::new(),
             func_name_to_id,
             loop_exit_stack: Vec::new(),
-            loop_header_stack: Vec::new()
+            loop_header_stack: Vec::new(),
         }
     }
 
@@ -628,8 +628,8 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
             ctx.loop_header_stack.push(header_blk);
 
             // Снимок locals — те же phi как в While
-            let loop_vars: Vec<(String, ValueId)> = ctx
-                .locals.iter().map(|(n, &id)| (n.clone(), id)).collect();
+            let loop_vars: Vec<(String, ValueId)> =
+                ctx.locals.iter().map(|(n, &id)| (n.clone(), id)).collect();
 
             let mut header_params: Vec<(ValueId, Type)> = Vec::new();
             let mut phi_locals: HashMap<String, ValueId> = HashMap::new();
@@ -643,7 +643,10 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
 
             // Сразу прыгаем в тело (без проверки условия)
             let pre_args: Vec<ValueId> = loop_vars.iter().map(|(_, id)| *id).collect();
-            ctx.set_term(MIRTerminator::Jmp { target: body_blk, args: pre_args.clone() });
+            ctx.set_term(MIRTerminator::Jmp {
+                target: body_blk,
+                args: pre_args.clone(),
+            });
 
             // Body
             ctx.switch_to(body_blk);
@@ -656,11 +659,18 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
 
             // После тела — прыгаем в header для проверки условия
             if !ctx.is_terminated() {
-                let back_args: Vec<ValueId> = loop_vars.iter().map(|(name, _)| {
-                    *ctx.locals.get(name.as_str())
-                        .unwrap_or_else(|| phi_locals.get(name.as_str()).unwrap())
-                }).collect();
-                ctx.set_term(MIRTerminator::Jmp { target: header_blk, args: back_args });
+                let back_args: Vec<ValueId> = loop_vars
+                    .iter()
+                    .map(|(name, _)| {
+                        *ctx.locals
+                            .get(name.as_str())
+                            .unwrap_or_else(|| phi_locals.get(name.as_str()).unwrap())
+                    })
+                    .collect();
+                ctx.set_term(MIRTerminator::Jmp {
+                    target: header_blk,
+                    args: back_args,
+                });
             }
 
             // Header: проверяем условие
@@ -671,9 +681,9 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
             let cond_val = lower_expr(ctx, cond, constants);
             ctx.set_term(MIRTerminator::Br {
                 cond: cond_val,
-                then_blk: body_blk,  // истина -> снова в тело
+                then_blk: body_blk, // истина -> снова в тело
                 then_args: Vec::new(),
-                else_blk: exit_blk,  // ложь -> выход
+                else_blk: exit_blk, // ложь -> выход
                 else_args: Vec::new(),
             });
 
@@ -688,14 +698,21 @@ fn lower_stmt(ctx: &mut Ctx, stmt: &Stmt, constants: &mut Vec<MIRConstant>) {
         }
 
         Stmt::Break => {
-            let exit = *ctx.loop_exit_stack.last()
-                .expect("break should be in loop");
-            ctx.set_term(MIRTerminator::Jmp { target: exit, args: vec![] });
+            let exit = *ctx.loop_exit_stack.last().expect("break should be in loop");
+            ctx.set_term(MIRTerminator::Jmp {
+                target: exit,
+                args: vec![],
+            });
         }
         Stmt::Continue => {
-            let header = *ctx.loop_header_stack.last()
+            let header = *ctx
+                .loop_header_stack
+                .last()
                 .expect("continue shouldn't be there");
-            ctx.set_term(MIRTerminator::Jmp { target: header, args: vec![] });
+            ctx.set_term(MIRTerminator::Jmp {
+                target: header,
+                args: vec![],
+            });
         }
 
         // -----------------------------------------------------------------
@@ -861,7 +878,7 @@ fn lower_expr(ctx: &mut Ctx, expr: &Expr, constants: &mut Vec<MIRConstant>) -> V
                 BinaryOp::Shl => ctx.emit(MIRInst::Shl(l, r)),
                 BinaryOp::Shr => match lty {
                     Type::I64 => ctx.emit(MIRInst::Sar(l, r)), // Арифметический сдвиг для знаковых
-                    _ => ctx.emit(MIRInst::Shr(l, r)),           // Логический для беззнаковых
+                    _ => ctx.emit(MIRInst::Shr(l, r)),         // Логический для беззнаковых
                 },
                 // Сравнения: F64 -> FCmp; I64 -> signed ICmp; иначе unsigned ICmp
                 BinaryOp::Eq => cmp(ctx, l, r, lty, ICmpOp::Eq, ICmpOp::Eq, FCmpOp::Eq),

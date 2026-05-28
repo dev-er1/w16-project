@@ -19,10 +19,16 @@ pub fn print() {
             format!(" {}", entry.args)
         };
 
-        println!("    \x1b[1;36m{:<8}\x1b[0m{args_part:<18}{}", entry.name, entry.description);
+        println!(
+            "    \x1b[1;36m{:<8}\x1b[0m{args_part:<18}{}",
+            entry.name, entry.description
+        );
 
         for flag in entry.flags {
-            println!("        \x1b[2;3m{:<22}\x1b[0m\x1b[38;5;232m{}\x1b[0m", flag.flag, flag.description);
+            println!(
+                "        \x1b[2;3m{:<22}\x1b[0m\x1b[38;5;232m{}\x1b[0m",
+                flag.flag, flag.description
+            );
         }
     }
 }

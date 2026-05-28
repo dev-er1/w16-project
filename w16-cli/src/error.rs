@@ -5,8 +5,8 @@
 //! `CLIError` — единственный публичный тип ошибки для всего CLI.
 //! Содержит типизированный `CliErrorKind`, ноль или больше `Diagnostic`-ов
 //! (заметки / подсказки), и опциональную строку `usage` из реестра `COMMANDS`.
-use std::fmt;
 use crate::cmd::COMMANDS;
+use std::fmt;
 
 // ---------------------------------------------------------------------------
 // Расстояние Левенштейна
@@ -20,15 +20,19 @@ pub fn levenshtein(a: &str, b: &str) -> usize {
     let (m, n) = (a.len(), b.len());
 
     let mut dp = vec![vec![0usize; n + 1]; m + 1];
-    for i in 0..=m { dp[i][0] = i; }
-    for j in 0..=n { dp[0][j] = j; }
+    for i in 0..=m {
+        dp[i][0] = i;
+    }
+    for j in 0..=n {
+        dp[0][j] = j;
+    }
 
     for i in 1..=m {
         for j in 1..=n {
             dp[i][j] = if a[i - 1] == b[j - 1] {
                 dp[i - 1][j - 1]
             } else {
-                1 + dp[i - 1][j - 1]  // замена
+                1 + dp[i - 1][j - 1] // замена
                     .min(dp[i - 1][j]) // удаление
                     .min(dp[i][j - 1]) // вставка
             };
@@ -78,11 +82,17 @@ pub struct Diagnostic {
 
 impl Diagnostic {
     pub fn note(msg: impl Into<String>) -> Self {
-        Self { level: DiagnosticLevel::Note, message: msg.into() }
+        Self {
+            level: DiagnosticLevel::Note,
+            message: msg.into(),
+        }
     }
 
     pub fn hint(msg: impl Into<String>) -> Self {
-        Self { level: DiagnosticLevel::Hint, message: msg.into() }
+        Self {
+            level: DiagnosticLevel::Hint,
+            message: msg.into(),
+        }
     }
 }
 
@@ -96,7 +106,10 @@ pub enum CliErrorKind {
     UnknownCommand(String),
 
     /// Не передан обязательный позиционный аргумент.
-    MissingArgument { cmd: &'static str, what: &'static str },
+    MissingArgument {
+        cmd: &'static str,
+        what: &'static str,
+    },
 
     /// Одновременно переданы взаимоисключающие флаги.
     ConflictingFlags(String, String),
@@ -114,18 +127,14 @@ pub enum CliErrorKind {
 impl fmt::Display for CliErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CliErrorKind::UnknownCommand(cmd) =>
-                write!(f, "unknown command `{cmd}`"),
-            CliErrorKind::MissingArgument { cmd, what } =>
-                write!(f, "command `{cmd}` requires an argument: {what}"),
-            CliErrorKind::ConflictingFlags(a, b) =>
-                write!(f, "conflicting flags `{a}` and `{b}`"),
-            CliErrorKind::FileNotFound(path) =>
-                write!(f, "file not found: `{path}`"),
-            CliErrorKind::UnknownStage(stage) =>
-                write!(f, "unknown debug stage `{stage}`"),
-            CliErrorKind::Runtime(msg) =>
-                write!(f, "{msg}"),
+            CliErrorKind::UnknownCommand(cmd) => write!(f, "unknown command `{cmd}`"),
+            CliErrorKind::MissingArgument { cmd, what } => {
+                write!(f, "command `{cmd}` requires an argument: {what}")
+            }
+            CliErrorKind::ConflictingFlags(a, b) => write!(f, "conflicting flags `{a}` and `{b}`"),
+            CliErrorKind::FileNotFound(path) => write!(f, "file not found: `{path}`"),
+            CliErrorKind::UnknownStage(stage) => write!(f, "unknown debug stage `{stage}`"),
+            CliErrorKind::Runtime(msg) => write!(f, "{msg}"),
         }
     }
 }
@@ -145,7 +154,11 @@ pub struct CLIError {
 
 impl CLIError {
     pub fn new(kind: CliErrorKind) -> Self {
-        Self { kind, diagnostics: Vec::new(), usage: None }
+        Self {
+            kind,
+            diagnostics: Vec::new(),
+            usage: None,
+        }
     }
 
     pub fn with_note(mut self, msg: impl Into<String>) -> Self {
@@ -160,7 +173,8 @@ impl CLIError {
 
     /// Найти строку `usage` для команды `cmd_name` в реестре `COMMANDS` и прикрепить её.
     pub fn with_usage_of(mut self, cmd_name: &str) -> Self {
-        self.usage = COMMANDS.iter()
+        self.usage = COMMANDS
+            .iter()
             .find(|c| c.name == cmd_name)
             .map(|c| c.usage);
         self
@@ -223,8 +237,7 @@ pub fn err_unknown_command(cmd: impl Into<String>) -> CLIError {
 }
 
 pub fn err_missing_arg(cmd: &'static str, what: &'static str) -> CLIError {
-    CLIError::new(CliErrorKind::MissingArgument { cmd, what })
-        .with_usage_of(cmd)
+    CLIError::new(CliErrorKind::MissingArgument { cmd, what }).with_usage_of(cmd)
 }
 
 pub fn err_conflicting_flags(a: &str, b: &str) -> CLIError {
@@ -247,11 +260,8 @@ pub fn err_unknown_stage(stage: impl Into<String>) -> CLIError {
         err = err.with_hint(format!("did you mean `{suggestion}`?"));
     }
 
-    err.with_hint(format!(
-        "available stages: {}",
-        DBG_STAGES.join(", ")
-    ))
-    .with_usage_of("dbg")
+    err.with_hint(format!("available stages: {}", DBG_STAGES.join(", ")))
+        .with_usage_of("dbg")
 }
 
 // ---------------------------------------------------------------------------
@@ -276,7 +286,7 @@ mod tests {
     #[test]
     fn test_did_you_mean_hit() {
         let names = command_names();
-        assert_eq!(did_you_mean("rn",   &names, 2), Some("run"));
+        assert_eq!(did_you_mean("rn", &names, 2), Some("run"));
         assert_eq!(did_you_mean("buid", &names, 2), Some("build"));
     }
 
@@ -289,7 +299,9 @@ mod tests {
     #[test]
     fn test_unknown_stage_suggests() {
         let err = err_unknown_stage("tokns");
-        let hints: Vec<_> = err.diagnostics.iter()
+        let hints: Vec<_> = err
+            .diagnostics
+            .iter()
             .filter(|d| d.level == DiagnosticLevel::Hint)
             .map(|d| d.message.as_str())
             .collect();

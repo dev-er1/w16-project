@@ -481,19 +481,18 @@ fn verify_inst(
 
     // Проверяем что у результата правильный тип (совпадает с infer_type)
     if let Some(rid) = result_id
-        && rid < func.value_types.len() {
-            let actual_ty = func.value_types[rid];
-            let expected_ty = crate::translator::lowerer::infer_type(inst);
-            if actual_ty != expected_ty {
-                errors.push(VerifyError::block(
-                    func_id,
-                    block_id,
-                    format!(
-                        "result %{rid}: recorded type {actual_ty:?} != inferred {expected_ty:?}"
-                    ),
-                ));
-            }
+        && rid < func.value_types.len()
+    {
+        let actual_ty = func.value_types[rid];
+        let expected_ty = crate::translator::lowerer::infer_type(inst);
+        if actual_ty != expected_ty {
+            errors.push(VerifyError::block(
+                func_id,
+                block_id,
+                format!("result %{rid}: recorded type {actual_ty:?} != inferred {expected_ty:?}"),
+            ));
         }
+    }
 }
 
 /// Проверяет допустимость комбинации src_ty -> dest_ty для данного CastKind.

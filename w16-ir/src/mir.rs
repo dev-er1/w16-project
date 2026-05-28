@@ -101,7 +101,12 @@ pub struct ValueData {
 
 impl ValueData {
     pub fn new(typ: Type, def: ValueDef) -> Self {
-        Self { typ, def, uses: Vec::new(), is_dead: false }
+        Self {
+            typ,
+            def,
+            uses: Vec::new(),
+            is_dead: false,
+        }
     }
 }
 
@@ -111,20 +116,36 @@ impl ValueData {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ICmpOp {
-    Eq, Ne,
-    Slt, Sle, Sgt, Sge,  // знаковые
-    Ult, Ule, Ugt, Uge,  // беззнаковые
+    Eq,
+    Ne,
+    Slt,
+    Sle,
+    Sgt,
+    Sge, // знаковые
+    Ult,
+    Ule,
+    Ugt,
+    Uge, // беззнаковые
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FCmpOp {
-    Eq, Ne, Lt, Le, Gt, Ge,
+    Eq,
+    Ne,
+    Lt,
+    Le,
+    Gt,
+    Ge,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CastKind {
-    I2F, U2F, F2I, F2U,
-    I2U, U2I,
+    I2F,
+    U2F,
+    F2I,
+    F2U,
+    I2U,
+    U2I,
     TruncU64ToU32,
     ZextU32ToU64,
     SextI32ToI64,
@@ -158,29 +179,54 @@ pub enum MIRInst {
     Xor(ValueId, ValueId),
     Not(ValueId),
     Shl(ValueId, ValueId),
-    Shr(ValueId, ValueId),  // логический сдвиг вправо
-    Sar(ValueId, ValueId),  // арифметический сдвиг вправо
+    Shr(ValueId, ValueId), // логический сдвиг вправо
+    Sar(ValueId, ValueId), // арифметический сдвиг вправо
 
     // --- Сравнения ---
-    ICmp { op: ICmpOp, lhs: ValueId, rhs: ValueId },
-    FCmp { op: FCmpOp, lhs: ValueId, rhs: ValueId },
+    ICmp {
+        op: ICmpOp,
+        lhs: ValueId,
+        rhs: ValueId,
+    },
+    FCmp {
+        op: FCmpOp,
+        lhs: ValueId,
+        rhs: ValueId,
+    },
 
     // --- Данные и память ---
     /// Загрузка глобальной константы по ConstantId.
     Const(ConstantId),
     /// Копирование SSA-значения (используется при inlining и φ-разрешении).
     Mov(ValueId),
-    Load  { addr: ValueId, typ: Type },
-    Store { addr: ValueId, value: ValueId },
-    Cast  { kind: CastKind, src: ValueId, dest_typ: Type },
-    Select { cond: ValueId, then_v: ValueId, else_v: ValueId },
-    Call  { func: FunctionId, args: Vec<ValueId> },
+    Load {
+        addr: ValueId,
+        typ: Type,
+    },
+    Store {
+        addr: ValueId,
+        value: ValueId,
+    },
+    Cast {
+        kind: CastKind,
+        src: ValueId,
+        dest_typ: Type,
+    },
+    Select {
+        cond: ValueId,
+        then_v: ValueId,
+        else_v: ValueId,
+    },
+    Call {
+        func: FunctionId,
+        args: Vec<ValueId>,
+    },
 
     // --- Вывод на консоль (side-effects) ---
-    PrintInt(ValueId),    // Вывести как signed i64
-    PrintUInt(ValueId),   // Вывести как unsigned u64
-    PrintFloat(ValueId),  // Вывести как f64
-    PrintStr(ValueId),    // Вывести как string (адрес из пула)
+    PrintInt(ValueId),   // Вывести как signed i64
+    PrintUInt(ValueId),  // Вывести как unsigned u64
+    PrintFloat(ValueId), // Вывести как f64
+    PrintStr(ValueId),   // Вывести как string (адрес из пула)
 }
 
 // =============================================================================
@@ -194,8 +240,10 @@ pub enum MIRTerminator {
     /// Условный переход.
     Br {
         cond: ValueId,
-        then_blk: BlockId, then_args: Vec<ValueId>,
-        else_blk: BlockId, else_args: Vec<ValueId>,
+        then_blk: BlockId,
+        then_args: Vec<ValueId>,
+        else_blk: BlockId,
+        else_args: Vec<ValueId>,
     },
     /// Возврат из функции. Пустой Vec = void return.
     Ret(Vec<ValueId>),
@@ -209,7 +257,12 @@ impl MIRTerminator {
     pub fn operands(&self) -> Vec<ValueId> {
         match self {
             MIRTerminator::Jmp { args, .. } => args.clone(),
-            MIRTerminator::Br { cond, then_args, else_args, .. } => {
+            MIRTerminator::Br {
+                cond,
+                then_args,
+                else_args,
+                ..
+            } => {
                 let mut v = vec![*cond];
                 v.extend_from_slice(then_args);
                 v.extend_from_slice(else_args);
@@ -225,7 +278,9 @@ impl MIRTerminator {
     pub fn successors(&self) -> Vec<BlockId> {
         match self {
             MIRTerminator::Jmp { target, .. } => vec![*target],
-            MIRTerminator::Br { then_blk, else_blk, .. } => vec![*then_blk, *else_blk],
+            MIRTerminator::Br {
+                then_blk, else_blk, ..
+            } => vec![*then_blk, *else_blk],
             MIRTerminator::Ret(_) | MIRTerminator::Halt => vec![],
         }
     }
@@ -360,33 +415,65 @@ impl MIRFunction {
 
 /// Заменяет `old` на `new` внутри одной инструкции.
 fn replace_in_inst(inst: &mut MIRInst, old: ValueId, new: ValueId) {
-    let patch = |v: &mut ValueId| { if *v == old { *v = new; } };
-    match inst {
-        MIRInst::Add(a, b) | MIRInst::Sub(a, b) | MIRInst::Mul(a, b)
-        | MIRInst::UDiv(a, b) | MIRInst::IDiv(a, b)
-        | MIRInst::URem(a, b) | MIRInst::IRem(a, b)
-        | MIRInst::FAdd(a, b) | MIRInst::FSub(a, b)
-        | MIRInst::FMul(a, b) | MIRInst::FDiv(a, b) | MIRInst::FRem(a, b)
-        | MIRInst::And(a, b) | MIRInst::Or(a, b) | MIRInst::Xor(a, b)
-        | MIRInst::Shl(a, b) | MIRInst::Shr(a, b) | MIRInst::Sar(a, b) => {
-            patch(a); patch(b);
+    let patch = |v: &mut ValueId| {
+        if *v == old {
+            *v = new;
         }
-        MIRInst::Neg(a) | MIRInst::FNeg(a) | MIRInst::FAbs(a)
-        | MIRInst::Not(a) | MIRInst::Mov(a) => {
+    };
+    match inst {
+        MIRInst::Add(a, b)
+        | MIRInst::Sub(a, b)
+        | MIRInst::Mul(a, b)
+        | MIRInst::UDiv(a, b)
+        | MIRInst::IDiv(a, b)
+        | MIRInst::URem(a, b)
+        | MIRInst::IRem(a, b)
+        | MIRInst::FAdd(a, b)
+        | MIRInst::FSub(a, b)
+        | MIRInst::FMul(a, b)
+        | MIRInst::FDiv(a, b)
+        | MIRInst::FRem(a, b)
+        | MIRInst::And(a, b)
+        | MIRInst::Or(a, b)
+        | MIRInst::Xor(a, b)
+        | MIRInst::Shl(a, b)
+        | MIRInst::Shr(a, b)
+        | MIRInst::Sar(a, b) => {
+            patch(a);
+            patch(b);
+        }
+        MIRInst::Neg(a)
+        | MIRInst::FNeg(a)
+        | MIRInst::FAbs(a)
+        | MIRInst::Not(a)
+        | MIRInst::Mov(a) => {
             patch(a);
         }
         MIRInst::ICmp { lhs, rhs, .. } | MIRInst::FCmp { lhs, rhs, .. } => {
-            patch(lhs); patch(rhs);
+            patch(lhs);
+            patch(rhs);
         }
         MIRInst::Cast { src, .. } => patch(src),
         MIRInst::Load { addr, .. } => patch(addr),
-        MIRInst::Store { addr, value } => { patch(addr); patch(value); }
-        MIRInst::Select { cond, then_v, else_v } => {
-            patch(cond); patch(then_v); patch(else_v);
+        MIRInst::Store { addr, value } => {
+            patch(addr);
+            patch(value);
+        }
+        MIRInst::Select {
+            cond,
+            then_v,
+            else_v,
+        } => {
+            patch(cond);
+            patch(then_v);
+            patch(else_v);
         }
         MIRInst::Call { args, .. } => args.iter_mut().for_each(patch),
         MIRInst::Const(_) => {}
-        MIRInst::PrintInt(a) | MIRInst::PrintUInt(a) | MIRInst::PrintFloat(a) | MIRInst::PrintStr(a) => {
+        MIRInst::PrintInt(a)
+        | MIRInst::PrintUInt(a)
+        | MIRInst::PrintFloat(a)
+        | MIRInst::PrintStr(a) => {
             patch(a);
         }
     }
@@ -394,10 +481,19 @@ fn replace_in_inst(inst: &mut MIRInst, old: ValueId, new: ValueId) {
 
 /// Заменяет `old` на `new` внутри terminator-а.
 fn replace_in_terminator(term: &mut MIRTerminator, old: ValueId, new: ValueId) {
-    let patch = |v: &mut ValueId| { if *v == old { *v = new; } };
+    let patch = |v: &mut ValueId| {
+        if *v == old {
+            *v = new;
+        }
+    };
     match term {
         MIRTerminator::Jmp { args, .. } => args.iter_mut().for_each(patch),
-        MIRTerminator::Br { cond, then_args, else_args, .. } => {
+        MIRTerminator::Br {
+            cond,
+            then_args,
+            else_args,
+            ..
+        } => {
             patch(cond);
             then_args.iter_mut().for_each(&patch);
             else_args.iter_mut().for_each(&patch);
@@ -478,7 +574,12 @@ pub struct MIRModule {
 
 impl MIRModule {
     pub fn new(name: String) -> Self {
-        Self { name, constants: Vec::new(), functions: Vec::new(), analysis: Vec::new() }
+        Self {
+            name,
+            constants: Vec::new(),
+            functions: Vec::new(),
+            analysis: Vec::new(),
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -529,7 +630,11 @@ impl MIRModule {
     /// Constant Folding использует дедупликацию чтобы не плодить дубли в пуле.
     pub fn intern_constant(&mut self, name: String, typ: Type, value: Literal) -> ConstantId {
         // Ищем по значению (не по имени) — анонимные литералы могут иметь разные имена
-        if let Some(id) = self.constants.iter().position(|c| c.typ == typ && c.value == value) {
+        if let Some(id) = self
+            .constants
+            .iter()
+            .position(|c| c.typ == typ && c.value == value)
+        {
             return id;
         }
         let id = self.constants.len();

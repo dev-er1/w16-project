@@ -1,104 +1,140 @@
+// w16c\src\lib.rs
+
 pub mod dotobj;
 
-pub use dotobj::{AOT, AOTError};
+pub use dotobj::{AOT, AOTError, OptLevel};
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use target_lexicon::Triple;
 use w16_core::Bytecode;
 
-pub const AOT_COMPILER_VERSION: &str = "0.1.0";
+pub const AOT_COMPILER_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Компилирует W16 байткод в исполняемый бинарник.
+///
+/// Шаг 1: генерирует объектный файл через Cranelift.
+/// Шаг 2: вызывает системный линковщик.
 pub fn compile_to_executable(
     bytecode: &Bytecode,
     output_name: &str,
     target: Triple,
 ) -> Result<String, AOTError> {
+    compile_to_executable_with_opts(bytecode, output_name, target, OptLevel::Speed)
+}
+
+/// То же что [`compile_to_executable`], но с явным уровнем оптимизации.
+pub fn compile_to_executable_with_opts(
+    bytecode: &Bytecode,
+    output_name: &str,
+    target: Triple,
+    opt_level: OptLevel,
+) -> Result<String, AOTError> {
     let output_path = Path::new(output_name);
+
     let obj_file = with_extension(
         output_path,
-        if cfg!(target_os = "windows") {
-            "obj"
-        } else {
-            "o"
-        },
+        if cfg!(target_os = "windows") { "obj" } else { "o" },
     );
     let exe_file = if cfg!(target_os = "windows") {
         with_extension(output_path, "exe")
     } else {
         output_path.to_path_buf()
     };
-    let obj_file = obj_file.to_string_lossy().to_string();
-    let exe_file = exe_file.to_string_lossy().to_string();
 
-    // Шаг 1: Генерируем объектный файл через Cranelift AOT
-    let aot = AOT::new(target.clone());
-    aot.try_compile(bytecode, &obj_file)?;
+    let obj_str = obj_file.to_string_lossy().to_string();
+    let exe_str = exe_file.to_string_lossy().to_string();
 
-    // Шаг 2: Вызываем линковщик в зависимости от ОС
-    let mut cmd = if cfg!(target_os = "windows") {
-        // Получаем путь к домашней папке пользователя (C:\Users\<Имя>)
-        let user_profile =
-            std::env::var("USERPROFILE").unwrap_or_else(|_| r"C:\Users\default".to_string());
+    // Имя модуля — stem выходного файла (вместо захардкоженного "w16_program").
+    let module_name = output_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("w16_program");
 
-        // Формируем точный путь к вашей статической библиотеке
-        let runtime_lib = format!(r"{user_profile}\w16\static-lib\w16-fns.lib");
-        // Запрашиваем у `cc` правильную команду для линковщика MSVC под нужный таргет.
-        // Он найдет оригинальный link.exe и пробросит все переменные (PATH, LIB, INCLUDE).
-        if let Some(tool) = cc::windows_registry::find_tool(target.to_string().as_str(), "link.exe")
-        {
-            let mut c = tool.to_command();
-            c.args([
-                &obj_file,
-                &runtime_lib,
-                "kernel32.lib",
-                &("/OUT:".to_string() + &exe_file),
-                "/ENTRY:_start",      // <--- Указываем вашу точку входа из dumpbin
-                "/SUBSYSTEM:CONSOLE", // <--- Говорим, что это консольное приложение
-                "/NODEFAULTLIB",      // <--- Отключаем стандартную линковку MSVC CRT
-            ]);
-            c
-        } else {
-            // Фолбек на случай, если Visual Studio не установлена (например, стоит MinGW gcc)
-            let mut c = Command::new("link.exe");
-            c.args([
-                &obj_file,
-                &runtime_lib,
-                "kernel32.lib",
-                &("/OUT:".to_string() + &exe_file),
-                "/ENTRY:_start",      // <--- Указываем вашу точку входа из dumpbin
-                "/SUBSYSTEM:CONSOLE", // <--- Говорим, что это консольное приложение
-                "/NODEFAULTLIB",      // <--- Отключаем стандартную линковку MSVC CRT
-            ]);
-            c
-        }
+    // Шаг 1: объектный файл.
+    let aot = AOT::new(target.clone(), opt_level, module_name);
+    aot.try_compile(bytecode, &obj_str)?;
+
+    // Шаг 2: линковка.
+    let mut cmd = build_linker_command(&obj_str, &exe_str, &target)?;
+    let status = cmd
+        .status()
+        .map_err(|e| AOTError::Cranelift(format!("failed to spawn linker: {e}")))?;
+
+    if status.success() {
+        let _ = std::fs::remove_file(&obj_str);
+        Ok(exe_str)
     } else {
-        // Для Linux / macOS оставляем стандартный cc
-        let mut c = Command::new("cc");
-        c.args([&obj_file, "-o", &exe_file]);
-        c
-    };
-
-    // Запускаем процесс линковки
-    let status = cmd.status();
-
-    match status {
-        Ok(status) if status.success() => {
-            // Удаляем временный объектный файл
-            let _ = std::fs::remove_file(&obj_file);
-            Ok(exe_file)
-        }
-        Ok(status) => Err(AOTError::Cranelift(format!(
-            "Linker failed with code {:?}",
+        Err(AOTError::Cranelift(format!(
+            "linker exited with code {:?}",
             status.code()
-        ))),
-        Err(e) => Err(AOTError::Cranelift(format!("failed to run linker: {e}"))),
+        )))
     }
 }
 
+// ---------------------------------------------------------------------------
+// Построение команды линковщика
+// ---------------------------------------------------------------------------
+
+fn build_linker_command(
+    obj_file: &str,
+    exe_file: &str,
+    target: &Triple,
+) -> Result<Command, AOTError> {
+    if cfg!(target_os = "windows") {
+        build_msvc_linker(obj_file, exe_file, target)
+    } else {
+        Ok(build_unix_linker(obj_file, exe_file))
+    }
+}
+
+fn build_msvc_linker(
+    obj_file: &str,
+    exe_file: &str,
+    target: &Triple,
+) -> Result<Command, AOTError> {
+    let user_profile = std::env::var("USERPROFILE")
+        .unwrap_or_else(|_| r"C:\Users\default".to_string());
+    let runtime_lib = format!(r"{user_profile}\w16\static-lib\w16-fns.lib");
+    let out_arg = format!("/OUT:{exe_file}");
+
+    let common_args = [
+        obj_file,
+        &runtime_lib,
+        "kernel32.lib",
+        &out_arg,
+        "/ENTRY:_start",
+        "/SUBSYSTEM:CONSOLE",
+        "/NODEFAULTLIB",
+    ];
+
+    // Предпочитаем MSVC link.exe найденный через cc крейт.
+    if let Some(tool) =
+        cc::windows_registry::find_tool(target.to_string().as_str(), "link.exe")
+    {
+        let mut cmd = tool.to_command();
+        cmd.args(common_args);
+        Ok(cmd)
+    } else {
+        // Фолбек — ищем link.exe в PATH.
+        let mut cmd = Command::new("link.exe");
+        cmd.args(common_args);
+        Ok(cmd)
+    }
+}
+
+fn build_unix_linker(obj_file: &str, exe_file: &str) -> Command {
+    let mut cmd = Command::new("cc");
+    cmd.args([obj_file, "-o", exe_file]);
+    cmd
+}
+
+// ---------------------------------------------------------------------------
+// Хелпер
+// ---------------------------------------------------------------------------
+
 fn with_extension(path: &Path, extension: &str) -> PathBuf {
-    let mut output = path.to_path_buf();
-    output.set_extension(extension);
-    output
+    let mut out = path.to_path_buf();
+    out.set_extension(extension);
+    out
 }

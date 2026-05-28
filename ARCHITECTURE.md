@@ -741,26 +741,26 @@ WCC should generate correct W16 HIR. If a C construct is unsupported, it is bett
 
 Main root workspace tests:
 
-```powershell
+```bash
 cargo test
 ```
 
 Experimental language tests:
 
-```powershell
+```bash
 cd example-langs
 cargo test
 ```
 
 Runtime benchmarks:
 
-```powershell
+```bash
 cargo bench -p w16-core
 ```
 
 Before a PR, it is recommended to run:
 
-```powershell
+```bash
 cargo fmt --check
 cargo clippy --workspace --all-targets
 cargo test
@@ -768,7 +768,7 @@ cargo test
 
 And separately:
 
-```powershell
+```bash
 cd example-langs
 cargo test
 ```

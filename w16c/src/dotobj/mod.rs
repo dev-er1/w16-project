@@ -106,7 +106,29 @@ impl fmt::Display for AOTError {
 
 impl std::error::Error for AOTError {}
 
-/// AOT-компилятор на базе Cranelift для W16 байткода.
+/// Уровень оптимизации для AOT-компиляции.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum OptLevel {
+    /// Без оптимизаций — быстрая компиляция, удобно для отладки.
+    None,
+    /// Скоростные оптимизации (по умолчанию).
+    #[default]
+    Speed,
+    /// Максимальные оптимизации.
+    SpeedAndSize,
+}
+ 
+impl OptLevel {
+    fn as_str(self) -> &'static str {
+        match self {
+            OptLevel::None => "none",
+            OptLevel::Speed => "speed",
+            OptLevel::SpeedAndSize => "speed_and_size",
+        }
+    }
+}
+
+/// # AOT-компилятор на базе Cranelift для W16 байткода.
 ///
 /// Компилятор создаёт нативную функцию, которая обновляет регистровый файл W16,
 /// выполняет проверки границ памяти и вызывает runtime-хелперы для операций,
@@ -139,9 +161,9 @@ impl AOT {
     /// Инициализирует Cranelift для текущей хостовой ISA, регистрирует
     /// внешние символы-специализированные функции и подготавливает пустой
     /// контекст компиляции.
-    pub fn new(target: Triple) -> Self {
+    pub fn new(target: Triple, opt_level: OptLevel, module_name: &str) -> Self {
         let mut flag_builder = settings::builder();
-        flag_builder.set("opt_level", "speed").unwrap();
+        flag_builder.set("opt_level", opt_level.as_str()).unwrap();
         let flags = settings::Flags::new(flag_builder);
 
         // Инициализируем ISA (архитектуру) под конкретную цель (Windows/Linux)
@@ -153,7 +175,7 @@ impl AOT {
         // Создаем билдер для объектного файла
         let builder = ObjectBuilder::new(
             isa,
-            "w16_program", // Имя внутреннего модуля
+            module_name,
             cranelift_module::default_libcall_names(),
         )
         .unwrap();

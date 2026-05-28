@@ -732,26 +732,26 @@ WCC должен генерировать корректный W16 HIR. Если
 
 Основные тесты корневого workspace:
 
-```powershell
+```bash
 cargo test
 ```
 
 Тесты экспериментальных языков:
 
-```powershell
+```bash
 cd example-langs
 cargo test
 ```
 
 Бенчмарки runtime:
 
-```powershell
+```bash
 cargo bench -p w16-core
 ```
 
 Перед PR желательно прогонять:
 
-```powershell
+```bash
 cargo fmt --check
 cargo clippy --workspace --all-targets
 cargo test
@@ -759,7 +759,7 @@ cargo test
 
 И отдельно:
 
-```powershell
+```bash
 cd example-langs
 cargo test
 ```

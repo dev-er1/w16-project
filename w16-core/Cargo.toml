@@ -1,16 +1,16 @@
 [package]
 name = "w16-core"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "Apache-2.0"
 description = "Ядро W16"
 repository = "https://github.com/dev-er1/w16-project"
 
 [dependencies]
-cranelift = "0.131.1"
-cranelift-jit = "0.131.1"
-cranelift-module = "0.131.1"
-cranelift-native = "0.131.1"
+cranelift = "0.132.0"
+cranelift-jit = "0.132.0"
+cranelift-module = "0.132.0"
+cranelift-native = "0.132.0"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

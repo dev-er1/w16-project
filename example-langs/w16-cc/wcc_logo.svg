@@ -1,4 +1,4 @@
-<svg width="400" height="400" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="400" height="400" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 
   <rect width="100" height="100" rx="0" fill="#ffffff"/>
 
@@ -14,7 +14,7 @@
        C28.8 36.8 38.4 27.1 51.2 27.1
        C56.3 27.1 60.8 28.6 64.5 31.3
        Z"
-    fill="#1454d4"/>
+    fill="blue"/>
 
   <path
     d="M69.1 32.4
@@ -31,7 +31,7 @@
     <path
       d="M2 7 L11 31 L19 15 L27 31 L36 7"
       fill="none"
-      stroke="#111111"
+      stroke="black"
       stroke-width="6"
       stroke-linejoin="bevel"
       stroke-linecap="square"/>
@@ -41,7 +41,7 @@
       font-family="Arial, Helvetica, sans-serif"
       font-size="18"
       font-weight="900"
-      fill="#e00000"
+      fill="red"
       text-anchor="middle">16</text>
   </g>
 </svg>

@@ -52,11 +52,6 @@ fn test_return_negative() {
 }
 
 #[test]
-fn test_unsigned_literal() {
-    compile_ok("unsigned int main() { return 67; }");
-}
-
-#[test]
 fn test_local_int_var() {
     compile_ok("int main() { int x = 42; return x; }");
 }

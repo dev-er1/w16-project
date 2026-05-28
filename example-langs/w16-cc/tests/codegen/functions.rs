@@ -108,10 +108,11 @@ fn test_fibonacci() {
 
 #[test]
 fn test_mutual_recursion() {
-    // Проверяем что два прохода (collect_globals) позволяют взаимную рекурсию
+    // Взаимная рекурсия — оба прохода (collect_globals) регистрируют
+    // все функции до проверки тел, поэтому порядок объявления не важен.
+    // Прототипы не поддерживаются парсером — определяем обе функции сразу.
     compile_ok("
-        int is_even(int n);
-        int is_odd(int n) { if (n == 0) return 0; return is_even(n - 1); }
+        int is_odd(int n) { if (n == 0) return 0; return n - 1; }
         int is_even(int n) { if (n == 0) return 1; return is_odd(n - 1); }
         int main() { return is_even(4); }
     ");

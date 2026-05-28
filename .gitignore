@@ -10,6 +10,7 @@
 *.dylib
 *.pdb
 w16-project workspace.code-workspace
+py.py
 
 # --- Специфично для Windows / IDE ---
 Thumbs.db

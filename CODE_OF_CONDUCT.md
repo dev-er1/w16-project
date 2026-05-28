@@ -1,3 +1,4 @@
+<!-- You better to read this file in review mode -->
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

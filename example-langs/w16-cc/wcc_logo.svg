@@ -1,0 +1,47 @@
+<svg width="400" height="400" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+
+  <rect width="100" height="100" rx="0" fill="#ffffff"/>
+
+  <path
+    d="M72.5 20.5
+       C66.5 15.8 59.1 13.2 50.8 13.2
+       C30.4 13.2 14.8 29.1 14.8 50
+       C14.8 70.9 30.4 86.8 50.8 86.8
+       C59.2 86.8 66.8 84.1 72.9 79.1
+       L64.8 68.5
+       C61.0 71.4 56.4 72.9 51.2 72.9
+       C38.4 72.9 28.8 63.2 28.8 50
+       C28.8 36.8 38.4 27.1 51.2 27.1
+       C56.3 27.1 60.8 28.6 64.5 31.3
+       Z"
+    fill="#1454d4"/>
+
+  <path
+    d="M69.1 32.4
+       C64.3 27.7 58.3 25.2 51.2 25.2
+       C37.2 25.2 26.5 36.0 26.5 50
+       C26.5 64.0 37.2 74.8 51.2 74.8
+       C58.4 74.8 64.6 72.1 69.4 67.2"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="7"
+    stroke-linecap="round"/>
+
+  <g transform="translate(31 36)">
+    <path
+      d="M2 7 L11 31 L19 15 L27 31 L36 7"
+      fill="none"
+      stroke="#111111"
+      stroke-width="6"
+      stroke-linejoin="bevel"
+      stroke-linecap="square"/>
+    <text
+      x="19"
+      y="12"
+      font-family="Arial, Helvetica, sans-serif"
+      font-size="18"
+      font-weight="900"
+      fill="#e00000"
+      text-anchor="middle">16</text>
+  </g>
+</svg>

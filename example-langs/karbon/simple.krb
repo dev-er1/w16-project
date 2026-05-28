@@ -1,4 +1,0 @@
-u32 var x = 10
-void fn main() {
-    print("hello")
-}

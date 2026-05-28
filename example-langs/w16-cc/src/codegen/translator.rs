@@ -1,6 +1,6 @@
 // example-langs\w16-cc\src\codegen\translator.rs
 //
-//! Трансляция AST -> `hir::Module`.
+//! Трансляция W16-CC AST -> `hir::Module`.
 //!
 //! Строит HIR AST напрямую без текстового промежуточного представления.
 //! Готовый `hir::Module` можно передать в `w16_lib::W16::run_hir_ast`.
@@ -30,11 +30,13 @@ struct FnCtx {
     scopes: Vec<HashMap<u32, String>>,
     /// Счётчик для генерации уникальных имён (`_t0`, `_t1`, ...).
     temp_counter: usize,
+    /// Имя текущей функции (для сообщений об ошибках).
+    _fn_name: String,
 }
 
 impl FnCtx {
-    fn new() -> Self {
-        Self { scopes: vec![HashMap::new()], temp_counter: 0 }
+    fn new(_fn_name: String) -> Self {
+        Self { scopes: vec![HashMap::new()], temp_counter: 0, _fn_name }
     }
 
     fn push(&mut self) { self.scopes.push(HashMap::new()); }
@@ -43,7 +45,7 @@ impl FnCtx {
 
     /// Объявить переменную и вернуть её HIR-имя.
     fn declare(&mut self, id: u32, hint: &str) -> String {
-        let name = format!("{hint}_{}", self.temp_counter);
+        let name = format!("{}_{}", hint, self.temp_counter);
         self.temp_counter += 1;
         self.scopes.last_mut().unwrap().insert(id, name.clone());
         name
@@ -119,7 +121,7 @@ impl<'a> AstTranslator<'a> {
 
     fn translate_function(&mut self, f: &FunctionDef) -> TranslationResult<HirFn> {
         let name = self.resolve(f.name);
-        let mut ctx = FnCtx::new();
+        let mut ctx = FnCtx::new(name.clone());
 
         // Параметры
         let mut params = Vec::new();
@@ -561,7 +563,7 @@ impl<'a> AstTranslator<'a> {
                 if let Some(kind) = cast_kind {
                     Ok(HirExpr::Cast { kind, expr: Box::new(val) })
                 } else {
-                    Ok(val) // нет-оп если типы совпадают
+                    Ok(val) // no-op если типы совпадают
                 }
             }
 
@@ -599,11 +601,33 @@ impl<'a> AstTranslator<'a> {
         out: &mut Vec<HirStmt>,
     ) -> TranslationResult<HirExpr> {
         let val = self.translate_expr(expr, ctx, out)?;
-        // В C любое ненулевое значение — истина. Сравниваем с 0.
+
+        // Если выражение уже возвращает Bool (сравнение, логика, bool-литерал)
+        // — возвращаем напрямую без обёртки `!= 0`.
+        let is_bool = matches!(&val,
+            HirExpr::Binary { op, .. } if matches!(op,
+                HirBinOp::Eq | HirBinOp::Ne | HirBinOp::Lt |
+                HirBinOp::Le | HirBinOp::Gt | HirBinOp::Ge
+            )
+        ) || matches!(&val, HirExpr::Literal(HirLit::Bool(_)));
+
+        if is_bool {
+            return Ok(val);
+        }
+
+        // Для знаковых локалей и литералов используем SignedInt(0) (-> I64),
+        // для беззнаковых — Int(0) (-> U64), чтобы типы совпадали в Ne.
+        let zero = match &val {
+            HirExpr::Literal(HirLit::Int(_)) => HirExpr::Literal(HirLit::Int(0)),
+            HirExpr::Literal(HirLit::SignedInt(_)) => HirExpr::Literal(HirLit::SignedInt(0)),
+            // Local — в большинстве случаев I64 (C int знаковый по умолчанию).
+            _ => HirExpr::Literal(HirLit::SignedInt(0)),
+        };
+
         Ok(HirExpr::Binary {
             op: HirBinOp::Ne,
             lhs: Box::new(val),
-            rhs: Box::new(HirExpr::Literal(HirLit::Int(0))),
+            rhs: Box::new(zero),
         })
     }
 
@@ -717,7 +741,8 @@ impl<'a> AstTranslator<'a> {
         };
 
         let old = HirExpr::Local(var_name.clone());
-        let one = HirExpr::Literal(HirLit::Int(1));
+        // SignedInt(1) чтобы тип совпадал с I64-переменной при Add/Sub.
+        let one = HirExpr::Literal(HirLit::SignedInt(1));
         let new_val = HirExpr::Binary {
             op: if is_inc { HirBinOp::Add } else { HirBinOp::Sub },
             lhs: Box::new(old.clone()),
@@ -754,17 +779,19 @@ fn translate_literal(v: &CValue) -> HirExpr {
     match v {
         CValue::Bool(b) => HirExpr::Literal(HirLit::Bool(*b)),
 
-        CValue::Int(i) => HirExpr::Literal(HirLit::SignedInt(*i as i64)),
-        CValue::Short(s) => HirExpr::Literal(HirLit::SignedInt(*s as i64)),
-        CValue::Long(l) => HirExpr::Literal(HirLit::SignedInt(*l)),
-        CValue::LongLong(l) => HirExpr::Literal(HirLit::SignedInt(*l)),
-
+        // Беззнаковые — U64, HIR видит правильный тип.
         CValue::UInt(u) => HirExpr::Literal(HirLit::Int(*u as u64)),
         CValue::UShort(u) => HirExpr::Literal(HirLit::Int(*u as u64)),
         CValue::ULong(u) => HirExpr::Literal(HirLit::Int(*u)),
         CValue::ULongLong(u) => HirExpr::Literal(HirLit::Int(*u)),
-
         CValue::Char(c) => HirExpr::Literal(HirLit::Int(*c as u64)),
+
+        // Знаковые — оборачиваем в cast.u2i чтобы HIR видел I64, а не U64.
+        // Биты те же, тип разный.
+        CValue::Int(i) => signed_lit(*i as i64),
+        CValue::Short(s) => signed_lit(*s as i64),
+        CValue::Long(l) => signed_lit(*l),
+        CValue::LongLong(l) => signed_lit(*l),
 
         CValue::Float(f) => HirExpr::Literal(HirLit::Float(*f as f64)),
         CValue::Double(d) => HirExpr::Literal(HirLit::Float(*d)),
@@ -772,9 +799,17 @@ fn translate_literal(v: &CValue) -> HirExpr {
     }
 }
 
+/// Создаёт знаковый литерал как `cast.u2i(<bits>)`.
+/// HIR хранит Int как u64 битово, но cast меняет семантический тип на I64.
+fn signed_lit(value: i64) -> HirExpr {
+    HirExpr::Cast {
+        kind: CastKind::U2I,
+        expr: Box::new(HirExpr::Literal(HirLit::Int(value as u64))),
+    }
+}
+
 fn default_value(ty: HirType) -> HirExpr {
     match ty {
-        HirType::I64 => HirExpr::Literal(HirLit::SignedInt(0)),
         HirType::F64 => HirExpr::Literal(HirLit::Float(0.0)),
         HirType::Bool => HirExpr::Literal(HirLit::Bool(false)),
         _ => HirExpr::Literal(HirLit::Int(0)),
@@ -806,6 +841,6 @@ fn compound_assign_op(op: &BinaryOp) -> HirBinOp {
         BinaryOp::XorAssign => HirBinOp::BitXor,
         BinaryOp::ShlAssign => HirBinOp::Shl,
         BinaryOp::ShrAssign => HirBinOp::Shr,
-        _      => unreachable!(),
+        _ => unreachable!(),
     }
 }

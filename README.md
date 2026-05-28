@@ -9,17 +9,15 @@
   [![GitHub release](https://img.shields.io/github/v/release/dev-er1/w16-project?style=flat-square)](https://github.com/dev-er1/w16-project/releases)
 </div>
 
-# О проекте ( About project )
-
 # Мини-навигация ( Mini-navigation )
 
-| Language / Язык | README                  | Contributing                        | License               | TPL ( Third Party Licenses )|
-|---------------- |-------------------------|-------------------------------------|-----------------------|-----------------------------|
-| 🇺🇸 **English**  | [English](README_EN.md) | [Guidelines](CONTRIBUTING.md)       | [Apache 2.0](LICENSE) | [NOTICE](NOTICE.html)       |
-| 🇷🇺 **Русский**  | [Русский](README_RU.md) | [Контрибьютинг](CONTRIBUTING_RU.md) | `Нету :(`             | `Нету :(`                   |
+| Language / Язык | README                  | Contributing                        | License               | TPL ( Third Party Licenses )| CoC ( Code of Conduct)    |
+|---------------- |-------------------------|-------------------------------------|-----------------------|-----------------------------|---------------------------|
+| 🇺🇸 **English**  | [English](README_EN.md) | [Contribute](CONTRIBUTING.md)       | [Apache 2.0](LICENSE) | [NOTICE](NOTICE.html)       |[CoC](CODE_OF_CONDUCT.md)  |
+| 🇷🇺 **Русский**  | [Русский](README_RU.md) | [Контрибьютинг](CONTRIBUTING_RU.md) | `Нету :(`             | `Нету :(`                   |[КП](CODE_OF_CONDUCT_RU.md)|
 
 
-## Contributers ( Контрибьюторы )
+## Contributors ( Контрибьюторы )
 <a href="https://github.com/dev-er1/w16-project/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=dev-er1/w16-project" alt="Contributors"/>
 </a>

@@ -321,7 +321,7 @@ impl OrcaEvm {
 
                     OpCode::FEq => {
                         *reg(regs, inst.a) = (f64::from_bits(*reg(regs, inst.b))
-                            == f64::from_bits(*reg(regs, inst.c)))
+                        == f64::from_bits(*reg(regs, inst.c)))
                             as u64;
                         pc = pc.add(1);
                     }

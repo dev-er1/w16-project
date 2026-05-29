@@ -1,11 +1,13 @@
 # ASCII
 # ---------------------------------------------
 w16-standart: "
-  MMM             MMM  MM   MMMM\n\
-   MMM    oMo    MMM   MM  MM\n\
-    MMM  MM MM  MMM    MM  MMMMa\n\
-     MMM M   M MMM     MM  MM  MM\n\
-      MMMP   PMMM      MM   MMMM"
+  MM    /M     mm    MM
+   MM  * M    m..   MM
+    MM   M    m  M MM
+     MM  M  M  MM MM
+      MM   M M   MM
+       MM M   M MM
+        MM     MM"
 
 
 w16-small: "

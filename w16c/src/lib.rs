@@ -136,3 +136,40 @@ fn with_extension(path: &Path, extension: &str) -> PathBuf {
     out.set_extension(extension);
     out
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use w16_core::{Bytecode, ConstantPool, Instruction, OpCode};
+
+    #[test]
+    fn aot_emits_object_file_with_entrypoint() {
+        let bytecode = Bytecode::new(
+            vec![
+                Instruction {
+                    opcode: OpCode::Load8,
+                    a: 0,
+                    b: 0,
+                    c: 42,
+                },
+                Instruction {
+                    opcode: OpCode::Halt,
+                    a: 0,
+                    b: 0,
+                    c: 0,
+                },
+            ],
+            ConstantPool::new(),
+        );
+        let out = std::env::temp_dir().join("w16c_aot_smoke.obj");
+        let out_str = out.to_string_lossy().to_string();
+
+        let generated = AOT::new(Triple::host(), OptLevel::None, "w16c_aot_smoke")
+            .try_compile(&bytecode, &out_str)
+            .unwrap();
+
+        let metadata = std::fs::metadata(&generated).unwrap();
+        assert!(metadata.len() > 0);
+        let _ = std::fs::remove_file(generated);
+    }
+}

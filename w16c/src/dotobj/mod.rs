@@ -59,10 +59,12 @@ use cranelift_codegen::{
     settings::{self, Configurable},
 };
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext, Variable};
-use cranelift_module::{FuncId, Linkage, Module};
+use cranelift_module::{DataDescription, DataId, FuncId, Linkage, Module};
 use cranelift_object::{ObjectBuilder, ObjectModule};
 use target_lexicon::Triple;
 use w16_core::{Bytecode, Instruction, OpCode, REGISTER_COUNT};
+
+const AOT_MEMORY_SIZE: usize = 1024 * 1024;
 
 /// Ошибки, которые могут возникнуть при компиляции W16 байткода AOT.
 ///
@@ -155,6 +157,13 @@ struct Imports {
     print_str: FuncId,
 }
 
+#[derive(Clone, Copy)]
+struct RuntimeData {
+    regs: DataId,
+    memory: DataId,
+    consts: DataId,
+}
+
 impl AOT {
     /// Создать новый экземпляр AOT-компилятора.
     ///
@@ -211,6 +220,7 @@ impl AOT {
 
         let int_ptr = self.module.target_config().pointer_type();
         let imports = self.declare_imports(int_ptr)?;
+        let runtime_data = self.define_runtime_data(bytecode)?;
         self.ctx.func.signature.params.clear();
         self.ctx.func.signature.returns.clear();
         self.ctx.func.signature.call_conv = self.module.target_config().default_call_conv;
@@ -689,15 +699,16 @@ impl AOT {
 
             let name = format!("w16_main_{}", self.function_counter);
             self.function_counter += 1;
-            let id = self
+            let main_id = self
                 .module
                 .declare_function(&name, Linkage::Export, &self.ctx.func.signature)
                 .map_err(|error| AOTError::Cranelift(error.to_string()))?;
             self.module
-                .define_function(id, &mut self.ctx)
+                .define_function(main_id, &mut self.ctx)
                 .map_err(|error| AOTError::Cranelift(error.to_string()))?;
 
             self.ctx.clear();
+            self.define_entrypoint(main_id, runtime_data, bytecode.constant_pool.data.len())?;
         }
 
         // Генерируем объектный файл и сохраняем на диск
@@ -706,6 +717,133 @@ impl AOT {
             .map_err(|e| AOTError::Cranelift(format!("Failed to write object file: {e}")))?;
 
         Ok(output_path.to_string())
+    }
+
+    fn define_runtime_data(&mut self, bytecode: &Bytecode) -> Result<RuntimeData, AOTError> {
+        let regs = self
+            .module
+            .declare_data("w16_aot_registers", Linkage::Local, true, false)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+        let mut regs_data = DataDescription::new();
+        regs_data.define_zeroinit(REGISTER_COUNT * std::mem::size_of::<u64>());
+        regs_data.set_align(8);
+        self.module
+            .define_data(regs, &regs_data)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+
+        let memory = self
+            .module
+            .declare_data("w16_aot_memory", Linkage::Local, true, false)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+        let mut memory_data = DataDescription::new();
+        memory_data.define_zeroinit(AOT_MEMORY_SIZE);
+        memory_data.set_align(8);
+        self.module
+            .define_data(memory, &memory_data)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+
+        let consts = self
+            .module
+            .declare_data("w16_aot_constants", Linkage::Local, false, false)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+        let mut consts_data = DataDescription::new();
+        consts_data.define(bytecode.constant_pool.data.clone().into_boxed_slice());
+        consts_data.set_align(8);
+        self.module
+            .define_data(consts, &consts_data)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+
+        Ok(RuntimeData {
+            regs,
+            memory,
+            consts,
+        })
+    }
+
+    fn define_entrypoint(
+        &mut self,
+        main_id: FuncId,
+        runtime_data: RuntimeData,
+        consts_len: usize,
+    ) -> Result<(), AOTError> {
+        let int_ptr = self.module.target_config().pointer_type();
+        let call_conv = self.module.target_config().default_call_conv;
+
+        self.ctx.func.signature.params.clear();
+        self.ctx.func.signature.returns.clear();
+        self.ctx.func.signature.call_conv = call_conv;
+        if !cfg!(target_os = "windows") {
+            self.ctx
+                .func
+                .signature
+                .returns
+                .push(AbiParam::new(types::I32));
+        }
+
+        {
+            let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut self.builder_context);
+            let entry = builder.create_block();
+            builder.switch_to_block(entry);
+
+            let regs_gv = self
+                .module
+                .declare_data_in_func(runtime_data.regs, builder.func);
+            let memory_gv = self
+                .module
+                .declare_data_in_func(runtime_data.memory, builder.func);
+            let consts_gv = self
+                .module
+                .declare_data_in_func(runtime_data.consts, builder.func);
+
+            let regs_ptr = builder.ins().global_value(int_ptr, regs_gv);
+            let memory_ptr = builder.ins().global_value(int_ptr, memory_gv);
+            let consts_ptr = builder.ins().global_value(int_ptr, consts_gv);
+            let memory_len = builder.ins().iconst(int_ptr, AOT_MEMORY_SIZE as i64);
+            let consts_len = builder.ins().iconst(int_ptr, consts_len as i64);
+
+            let main_func = self.module.declare_func_in_func(main_id, builder.func);
+            builder.ins().call(
+                main_func,
+                &[regs_ptr, memory_ptr, memory_len, consts_ptr, consts_len],
+            );
+
+            let exit_code64 = builder.ins().load(types::I64, MemFlags::new(), regs_ptr, 0);
+            let exit_code32 = builder.ins().ireduce(types::I32, exit_code64);
+
+            if cfg!(target_os = "windows") {
+                let mut exit_sig = self.module.make_signature();
+                exit_sig.call_conv = call_conv;
+                exit_sig.params.push(AbiParam::new(types::I32));
+                let exit_id = self
+                    .module
+                    .declare_function("ExitProcess", Linkage::Import, &exit_sig)
+                    .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+                let exit_func = self.module.declare_func_in_func(exit_id, builder.func);
+                builder.ins().call(exit_func, &[exit_code32]);
+                builder.ins().return_(&[]);
+            } else {
+                builder.ins().return_(&[exit_code32]);
+            }
+
+            builder.seal_all_blocks();
+            builder.finalize();
+        }
+
+        let entry_name = if cfg!(target_os = "windows") {
+            "_start"
+        } else {
+            "main"
+        };
+        let entry_id = self
+            .module
+            .declare_function(entry_name, Linkage::Export, &self.ctx.func.signature)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+        self.module
+            .define_function(entry_id, &mut self.ctx)
+            .map_err(|error| AOTError::Cranelift(error.to_string()))?;
+        self.ctx.clear();
+
+        Ok(())
     }
 
     fn declare_imports(&mut self, int_ptr: Type) -> Result<Imports, AOTError> {

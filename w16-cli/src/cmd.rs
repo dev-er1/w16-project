@@ -91,7 +91,7 @@ pub const COMMANDS: &[CommandUsage] = &[
     CommandUsage {
         name: "version",
         args: "",
-        description: "Print the W16 runtime version",
+        description: "Print the W16 CLI version",
         usage: "w16 version",
         flags: &[],
     },

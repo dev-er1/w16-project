@@ -12,6 +12,8 @@
 w16-project workspace.code-workspace
 py.py
 gifs/
+w16-irf/
+packages/
 
 # --- Специфично для Windows / IDE ---
 Thumbs.db

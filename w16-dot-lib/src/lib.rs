@@ -192,25 +192,3 @@ pub extern "C" fn w16_object_print_str(consts: *const u8, consts_len: usize, ind
     }
 }
 
-unsafe extern "C" {
-    // Указываем сигнатуру, которую ожидает Cranelift (запись по указателю)
-    fn w16_main_0(result_ptr: *mut u64);
-}
-
-// Наша новая публичная функция вывода (вы ведь её реализовали через Win32 API?)
-// Предположим, она называется w16_object_print_uint или аналогично.
-
-/// Настоящая точка входа для Windows
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn _start() -> ! {
-    let mut return_value: u64 = 0;
-    
-    // Передаем легитимный адрес на стеке! 
-    // Теперь Cranelift безопасно запишет сумму именно сюда.
-    unsafe { w16_main_0(&mut return_value) };
-    
-    // Завершаем процесс, передавая остаток (код возврата Windows ограничен 32 битами)
-    unsafe {
-        ExitProcess(return_value as u32);
-    }
-}

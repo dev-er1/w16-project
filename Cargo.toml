@@ -8,3 +8,6 @@ members = [
     "w16-lib",
     "w16c"
 ]
+
+[profile.dev]
+debug = 1

@@ -37,7 +37,7 @@ pub const COMMANDS: &[CommandUsage] = &[
         flags: &[
             FlagUsage {
                 flag: "-i",
-                description: "Interpreter / VM mode (default)",
+                description: "Interpreter mode (default)",
             },
             FlagUsage {
                 flag: "-j",
@@ -47,6 +47,10 @@ pub const COMMANDS: &[CommandUsage] = &[
                 flag: "--time",
                 description: "Print execution time after run",
             },
+            FlagUsage {
+                flag: "--orca",
+                description: "[EXPERIMENTAL]: Interpretation through Orca VM (unsafe)"
+            }
         ],
     },
     CommandUsage {
@@ -111,11 +115,15 @@ pub const COMMANDS: &[CommandUsage] = &[
 /// Режим выполнения для команды `run`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum RunMode {
-    /// Интерпретатор / VM (по умолчанию).
+    /// Интерпретатор (по умолчанию).
     #[default]
     Interpreter,
+
     /// JIT-компиляция.
     Jit,
+
+    /// Интерпретация через `Orca VM`
+    OrcaVM,
 }
 
 /// Стадия дебага для команды `dbg`.

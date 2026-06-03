@@ -46,15 +46,17 @@ fn parse_run(tokens: &[Token]) -> Result<Command, CLIError> {
 
     let wants_interp = has_short(tokens, "-i");
     let wants_jit = has_short(tokens, "-j");
+    let wants_orca = has_long(tokens, "--orca");
 
-    if wants_interp && wants_jit {
-        return Err(err_conflicting_flags("-i", "-j"));
+    if wants_interp && wants_jit && wants_orca {
+        return Err(err_conflicting_flags("-i", "-j", "--orca"));
     }
 
-    let run_mode = if wants_jit {
-        RunMode::Jit
-    } else {
-        RunMode::Interpreter
+    let run_mode = match (wants_interp, wants_interp, wants_orca) {
+        (true, false, false) => RunMode::Interpreter,
+        (false, true, false) => RunMode::Jit,
+        (false, false, true) => RunMode::OrcaVM,
+        _ => RunMode::Interpreter
     };
     let show_time = has_long(tokens, "--time");
 

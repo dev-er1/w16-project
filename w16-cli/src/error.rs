@@ -112,7 +112,7 @@ pub enum CliErrorKind {
     },
 
     /// Одновременно переданы взаимоисключающие флаги.
-    ConflictingFlags(String, String),
+    ConflictingFlags(String, String, String),
 
     /// Указанный путь не существует на диске.
     FileNotFound(String),
@@ -131,7 +131,7 @@ impl fmt::Display for CliErrorKind {
             CliErrorKind::MissingArgument { cmd, what } => {
                 write!(f, "command `{cmd}` requires an argument: {what}")
             }
-            CliErrorKind::ConflictingFlags(a, b) => write!(f, "conflicting flags `{a}` and `{b}`"),
+            CliErrorKind::ConflictingFlags(a, b, c) => write!(f, "conflicting flags `{a}` and `{b}` (maybe and `{c}`)"),
             CliErrorKind::FileNotFound(path) => write!(f, "file not found: `{path}`"),
             CliErrorKind::UnknownStage(stage) => write!(f, "unknown debug stage `{stage}`"),
             CliErrorKind::Runtime(msg) => write!(f, "{msg}"),
@@ -240,8 +240,8 @@ pub fn err_missing_arg(cmd: &'static str, what: &'static str) -> CLIError {
     CLIError::new(CliErrorKind::MissingArgument { cmd, what }).with_usage_of(cmd)
 }
 
-pub fn err_conflicting_flags(a: &str, b: &str) -> CLIError {
-    CLIError::new(CliErrorKind::ConflictingFlags(a.into(), b.into()))
+pub fn err_conflicting_flags(a: &str, b: &str, c: &str) -> CLIError {
+    CLIError::new(CliErrorKind::ConflictingFlags(a.into(), b.into(), c.into()))
         .with_note("only one execution mode can be active at a time")
         .with_usage_of("run")
 }
@@ -316,7 +316,7 @@ mod tests {
 
     #[test]
     fn test_conflicting_flags_has_usage() {
-        let err = err_conflicting_flags("-i", "-j");
+        let err = err_conflicting_flags("-i", "-j", "--orca");
         assert!(err.usage.is_some());
     }
 }

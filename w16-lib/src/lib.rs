@@ -22,8 +22,12 @@ pub use w16_ir::{
 pub enum ExecutionMode {
     /// Запуск через регистровую VM.
     Interpreter,
+
     /// Запуск через Cranelift JIT.
     Jit,
+
+    /// Запуск через Orca VM (экспериментальная ВМ).
+    Orca,
 }
 
 /// Настройки компиляции HIR/MIR в bytecode.
@@ -31,6 +35,7 @@ pub enum ExecutionMode {
 pub struct CompileOptions {
     /// FunctionId точки входа. Обычно `@main` оказывается функцией `0`.
     pub entry_function_id: usize,
+
     /// Запускать MIR-оптимизации перед генерацией bytecode.
     pub optimize_mir: bool,
 }
@@ -373,6 +378,11 @@ pub fn run_bytecode_with_options(
         ExecutionMode::Interpreter => w16_core::run(bytecode, options.memory_size)?,
         ExecutionMode::Jit => {
             w16_core::run_by_jit(bytecode).map_err(|err| W16Error::Jit(err.to_string()))?
+        },
+        ExecutionMode::Orca => {
+            let mut orca_vm = w16_core::interpreter::evms::OrcaEvm::new(1024);
+
+            unsafe { orca_vm.run_unchecked(bytecode); orca_vm.registers }
         }
     };
 

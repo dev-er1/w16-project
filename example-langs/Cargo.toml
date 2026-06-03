@@ -3,3 +3,6 @@ resolver = "3"
 members = [
     "w16-cc"
 ]
+
+[profile.dev]
+debug = 1

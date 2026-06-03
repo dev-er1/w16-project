@@ -46,6 +46,7 @@ impl Executer {
         let mode = match cmd.flags.run_mode {
             RunMode::Interpreter => ExecutionMode::Interpreter,
             RunMode::Jit => ExecutionMode::Jit,
+            RunMode::OrcaVM => ExecutionMode::Orca
         };
 
         // Замер времени: оборачиваем только сам вызов рантайма.

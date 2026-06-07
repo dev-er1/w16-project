@@ -4,7 +4,6 @@ members = [
     "w16-cli",
     "w16-core",
     "w16-ir",
-    "w16-irf",
     "w16-lib",
     "w16c"
 ]

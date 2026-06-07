@@ -380,7 +380,7 @@ w16-cli
 w16c
     Экспериментальная AOT-компиляция bytecode в объектный/исполняемый файл.
 
-example-langs/w16-cc
+w16-langs/w16-cc
     C frontend, который генерирует W16 HIR.
 ```
 

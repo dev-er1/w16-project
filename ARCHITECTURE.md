@@ -40,10 +40,10 @@ w16-lib     - convenient public facade API over w16-ir and w16-core
 w16c        - experimental AOT compilation from bytecode to object/executable files
 ```
 
-The separate `example-langs` workspace contains experimental languages that use W16 as a backend:
+The separate `w16-langs` workspace contains experimental languages that use W16 as a backend:
 
 ```text
-example-langs/w16-cc - experimental C frontend, shortened as WCC
+w16-langs/w16-cc - experimental C frontend, shortened as WCC
 ```
 
 This separation is important: the W16 core should not depend on a concrete language, while example languages can evolve more freely.
@@ -54,7 +54,7 @@ This separation is important: the W16 core should not depend on a concrete langu
 
 A frontend is the part that understands a concrete source language.
 
-For example, `example-langs/w16-cc` parses C-like code:
+For example, `w16-langs/w16-cc` parses C-like code:
 
 ```text
 C source
@@ -485,14 +485,14 @@ w16-lib should not depend on w16c as a stable runtime.
 w16-cli may expose AOT commands only when they are explicitly supported by the environment.
 ```
 
-## example-langs/w16-cc
+## w16-langs/w16-cc
 
 `w16-cc`, or WCC, is an experimental C frontend over W16.
 
 It lives outside the root workspace:
 
 ```text
-example-langs/w16-cc
+w16-langs/w16-cc
 ```
 
 It owns:
@@ -510,22 +510,22 @@ It owns:
 Important files:
 
 ```text
-example-langs/w16-cc/src/frontend/lexer/
+w16-langs/w16-cc/src/frontend/lexer/
     Tokens and lexer.
 
-example-langs/w16-cc/src/frontend/parser/
+w16-langs/w16-cc/src/frontend/parser/
     AST and parser.
 
-example-langs/w16-cc/src/frontend/semantic/
+w16-langs/w16-cc/src/frontend/semantic/
     Name, type, and symbol checks.
 
-example-langs/w16-cc/src/codegen/
+w16-langs/w16-cc/src/codegen/
     AST -> W16 HIR translation.
 
-example-langs/w16-cc/src/value/f80.rs
+w16-langs/w16-cc/src/value/f80.rs
     80-bit floating-point value for long double.
 
-example-langs/w16-cc/tests/
+w16-langs/w16-cc/tests/
     Lexer/parser/codegen/F80 tests.
 ```
 
@@ -638,7 +638,7 @@ These parts should be changed carefully, with tests and a clear migration path.
 w16-ir MIR
 w16-ir optimizer
 w16-cli commands
-example-langs/w16-cc
+w16-langs/w16-cc
 ```
 
 API changes are acceptable here if they improve the architecture and are covered by tests.
@@ -730,9 +730,9 @@ CLI should remain predictable. Users should not need to know the internal archit
 Check:
 
 ```text
-example-langs/w16-cc/src/frontend/
-example-langs/w16-cc/src/codegen/
-example-langs/w16-cc/tests/
+w16-langs/w16-cc/src/frontend/
+w16-langs/w16-cc/src/codegen/
+w16-langs/w16-cc/tests/
 ```
 
 WCC should generate correct W16 HIR. If a C construct is unsupported, it is better to emit a clear error than to generate incorrect HIR.
@@ -748,7 +748,7 @@ cargo test
 Experimental language tests:
 
 ```bash
-cd example-langs
+cd w16-langs
 cargo test
 ```
 
@@ -769,7 +769,7 @@ cargo test
 And separately:
 
 ```bash
-cd example-langs
+cd w16-langs
 cargo test
 ```
 
@@ -785,7 +785,7 @@ If you are opening W16 for the first time, a good reading order is:
 6. `w16-ir/src/mir.rs` - MIR model.
 7. `w16-core/src/bytecode.rs` - bytecode format.
 8. `w16-core/src/interpreter/vm.rs` - bytecode execution.
-9. `example-langs/w16-cc/src/codegen/` - an example frontend that generates W16 HIR.
+9. `w16-langs/w16-cc/src/codegen/` - an example frontend that generates W16 HIR.
 
 ## What Counts as a Good Contribution
 

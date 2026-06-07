@@ -1,7 +1,8 @@
 <!-- Рекомендуется читать этот файл в режиме предпросмотра -->
-# W16
-
 <div align="center">
+
+  # `W16`
+
   <img src="w16-logo.png" width="400" alt="W16 Logo">
 
   [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)

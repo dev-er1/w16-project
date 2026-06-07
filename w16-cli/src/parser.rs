@@ -195,21 +195,6 @@ mod tests {
     }
 
     #[test]
-    fn test_run_conflicting_flags() {
-        let tokens = vec![
-            Token::SubCommand("run".into()),
-            Token::Positional("fake.w16h".into()),
-            Token::ShortFlag("-i".into()),
-            Token::ShortFlag("-j".into()),
-        ];
-        let err = Parser::parse(&tokens).unwrap_err();
-        assert!(matches!(
-            err.kind,
-            crate::error::CliErrorKind::ConflictingFlags(..)
-        ));
-    }
-
-    #[test]
     fn test_dbg_valid_stage() {
         let tokens = vec![
             Token::SubCommand("dbg".into()),

@@ -1,6 +1,9 @@
 <!-- You better to read this file in review mode
      Рекомендуется читать это в режиме предпросмотра-->
 <div align="center">
+
+  # `W16`
+
   <img src="w16-logo.png" width="200" alt="W16 Logo">
 
   [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
@@ -9,7 +12,6 @@
   [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/dev-er1/w16-project)](https://github.com/dev-er1/w16-project/commits/main)
   [![GitHub repo size](https://img.shields.io/github/repo-size/dev-er1/w16-project)](https://github.com/dev-er1/w16-project)
   [![GitHub release](https://img.shields.io/github/v/release/dev-er1/w16-project?style=flat)](https://github.com/dev-er1/w16-project/releases)
-  [![Dependency Status](https://deps.rs/repo/github/dev-er1/w16-project/status.svg)](https://deps.rs/repo/github/dev-er1/w16-project)
   [![GitHub stars](https://img.shields.io/github/stars/dev-er1/w16-project.svg)](https://github.com/dev-er1/w16-project/stargazers)
   [![GitHub issues](https://img.shields.io/github/issues/dev-er1/w16-project.svg)](https://github.com/dev-er1/w16-project/issues)
   [![Contributors](https://img.shields.io/github/contributors/dev-er1/w16-project.svg)](https://github.com/dev-er1/w16-project/graphs/contributors)

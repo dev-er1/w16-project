@@ -1,0 +1,50 @@
+name: W16 CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  w16-ci:
+    name: W16 & w16-langs CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Enable Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            w16-langs
+
+      - name: Root: Cargo check
+        run: cargo check
+
+      - name: Root: Cargo build (Release)
+        run: cargo build --release
+
+      - name: Root: Cargo test
+        run: cargo test
+
+      - name: w16-langs: Cargo check
+        working-directory: ./w16-langs
+        run: cargo check
+
+      - name: w16-langs: Cargo build (Release)
+        working-directory: ./w16-langs
+        run: cargo build --release
+
+      - name: w16-langs: Cargo test
+        working-directory: ./w16-langs
+        run: cargo test

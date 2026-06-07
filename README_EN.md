@@ -1,7 +1,8 @@
 <!-- You better to read this file in review mode -->
-# W16
-
 <div align="center">
+
+  # `W16`
+
   <img src="w16-logo.png" width="400" alt="W16 Logo">
 
   [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
@@ -17,8 +18,6 @@
 </p>
 
 ---
-
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 ## What is W16?
 

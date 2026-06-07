@@ -21,30 +21,30 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Enable Rust Cache
+      - name: Enable сache
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
             .
             w16-langs
 
-      - name: Root: Cargo check
+      - name: w16-project cargo check
         run: cargo check
 
-      - name: Root: Cargo build (Release)
+      - name: w16-project cargo build (Release)
         run: cargo build --release
 
-      - name: Root: Cargo test
+      - name: w16-project cargo test
         run: cargo test
 
-      - name: w16-langs: Cargo check
+      - name: w16-langs cargo check
         working-directory: ./w16-langs
         run: cargo check
 
-      - name: w16-langs: Cargo build (Release)
+      - name: w16-langs cargo build (Release)
         working-directory: ./w16-langs
         run: cargo build --release
 
-      - name: w16-langs: Cargo test
+      - name: w16-langs cargo test
         working-directory: ./w16-langs
         run: cargo test
